@@ -59,19 +59,23 @@ print_g <- function(g,title,w,h){
 # Input include
 # varname: name for the variable to investigate
 # df: data frame to process
-TS_plot <- function(varname,df){
+# Site_ID: Site code
+TS_plot <- function(varname,df,Site_ID){
   # Keep target variable
   df_tmp <- df %>%
     filter(var == varname) %>%
     mutate(date = as.Date(date))
   if(varname == "discharge"){
     g <- ggplot(data = df_tmp,aes(x = date,y = val))+
-      geom_line(color=my_color[3])+
+      geom_segment(aes(xend=date,y=0,yend=val),color=my_color[3])+
+      #geom_line(color=my_color[3])+
       my_theme+
-      labs(x = "",y="Q",color="")
+      labs(x = "",y="Q",color="")+
+      ggtitle(Site_ID)
   }else if(varname == "precipitation"){
     g <- ggplot(data = df_tmp,aes(x = date,y = val,color=factor(ms_interp)))+
-      geom_line()+
+      geom_segment(aes(xend=date,y=0,yend=val))+
+      #geom_line()+
       my_theme+
       labs(x = "",y="P",color="")+
       scale_color_manual(values = c("0" = my_color[1],
@@ -82,3 +86,32 @@ TS_plot <- function(varname,df){
   }
   return(g)
 }
+
+# This function is to make histogram of target variable
+# Input include
+# varname: name for the variable to investigate
+# df: data frame to process
+Hist_plot <- function(varname,df){
+  # Keep target variable
+  df_tmp <- df %>%
+    filter(var == varname) %>%
+    mutate(date = as.Date(date))
+  if(varname == "discharge"){
+    g <- ggplot(data=df_tmp,aes(x=val))+
+      geom_histogram(bins = 11,color="black",fill=my_color[3])+
+      my_theme+
+      labs(x=varname)
+  }else if(varname == "precipitation"){
+    g <- ggplot(data=df_tmp,aes(x=val,fill=as.factor(ms_interp)))+
+      geom_histogram(bins=11,color="black",alpha=0.7)+
+      scale_fill_manual(values = c("0" = my_color[1],
+                                   "1" = my_color[2]),
+                        labels = c("0" = "Not interpolated",
+                                   "1" = "Interpolated"))+
+      theme(legend.position = c(0.7,0.8))+
+      my_theme+
+      labs(x=varname,fill="")
+  }
+  return(g)
+}
+

@@ -55,6 +55,8 @@ summary_stat <- MS_df %>%
 interp_n <- c()
 interp_interval_mean <- c()
 interp_interval_median <- c()
+# Initiliaze a list to store output figures
+g_all <- list()
 # Loop over all sites
 for(i in 1:length(Site_ID_ls)){
   Site_ID <- Site_ID_ls[i]
@@ -81,15 +83,23 @@ for(i in 1:length(Site_ID_ls)){
   interp_interval_median <- c(interp_interval_median,median(interp_lengths))
   
   # Make a TS plot of Q and P
-  g_P <- TS_plot("precipitation",Site_df)
-  g_Q <- TS_plot("discharge",Site_df)
+  g_P <- TS_plot("precipitation",Site_df,Site_ID)
+  g_Q <- TS_plot("discharge",Site_df,Site_ID)
+  
+  # Get the distribution of P and Q
+  g_hist_P <- Hist_plot("precipitation",Site_df)
+  g_hist_Q <- Hist_plot("discharge",Site_df)
+
+  # Distribution after removing 0
+  
   # Make the distribution of precipitation interpolation length
   
   # Combine them together
   
-
-  
-  
+  g <- plot_grid(g_Q,g_hist_Q,
+                 g_P,g_hist_P,
+                 nrow=2,align="hv",axis="tblr")
+  g_all[[i]] <- g
 }
 
 # Put interpolation info into a df
