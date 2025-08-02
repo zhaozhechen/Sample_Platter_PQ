@@ -12,6 +12,11 @@ library(tidyr)
 Input_path <- here("../../../Data/")
 # Output path
 Output_path <- here("../Results/")
+# Source functions
+source(here("Functions.R"))
+# Colors
+my_color <- brewer.pal(5,"Dark2")
+
 
 # ------- Main ---------
 # Read in Macroshed dataset
@@ -46,26 +51,59 @@ summary_stat <- MS_df %>%
   select(site_code,Q_n_total,Q_stats1_pt,Q_interp1_pt,
          P_n_total,P_stats1_pt,P_interp1_pt)
 
-# Get interpolated value intervals
-
-
-
-# Output this summary table
-write.csv(summary_stat,here(Output_path,"Site_summary.csv"))
-
+# Initialize vectors to store interpolation info
+interp_n <- c()
+interp_interval_mean <- c()
+interp_interval_median <- c()
 # Loop over all sites
-for(i in length(Site_ID_ls)){
+for(i in 1:length(Site_ID_ls)){
   Site_ID <- Site_ID_ls[i]
   # Get data for this site
   Site_df <- MS_df %>%
     filter(site_code == Site_ID)
+  # Remove questionable data
+  Site_df$val[!is.na(Site_df$ms_status) & Site_df$ms_status == 1] <- NA
+  
+  # Get length distribution of interpolated data
+  # Note: since no interpolated Q, so only did this for precipitation
+  interp_lengths <- interpolated_interval("precipitation",Site_df)
+  # Get the number of interpolated segments
+  if(length(interp_lengths)==1){
+    if(is.na(interp_lengths)){
+      interp_n <- c(interp_n,0) 
+    }
+  }else{
+    interp_n <- c(interp_n,length(interp_lengths))
+  }
+  # Get the mean interpolation interval
+  interp_interval_mean <- c(interp_interval_mean,mean(interp_lengths))
+  # Get the median interpolation interval
+  interp_interval_median <- c(interp_interval_median,median(interp_lengths))
+  
+  # Make a TS plot of Q and P
+  g_P <- TS_plot("precipitation",Site_df)
+  g_Q <- TS_plot("discharge",Site_df)
+  # Make the distribution of precipitation interpolation length
+  
+  # Combine them together
+  
 
-
+  
+  
 }
 
-
-
-
-
+# Put interpolation info into a df
+# Note: since no interpolated Q, so only did this for precipitation
+interp_summary_df <- data.frame(
+  site_code = Site_ID_ls,
+  interp_n = interp_n,
+  interp_interval_mean = interp_interval_mean,
+  interp_interval_median = interp_interval_median
+)
+# Combine this with the summary_stat df
+summary_stat <- summary_stat %>%
+  right_join(interp_summary_df,by="site_code")
+# Output this summary table
+write.csv(summary_stat,here(Output_path,"Site_summary.csv"))
 
 
