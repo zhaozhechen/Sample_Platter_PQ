@@ -118,7 +118,8 @@ Hist_plot <- function(varname,df,zero_remove){
                                    "1" = my_color[2]),
                         labels = c("0" = "Not interp",
                                    "1" = "Interp"))+
-      theme(legend.position = c(0.6,0.8))+
+      theme(legend.position = c(0.6,0.8),
+            legend.background = element_blank())+
       my_theme+
       labs(x="P",fill="")
   }

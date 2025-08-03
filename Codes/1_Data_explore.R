@@ -76,9 +76,22 @@ for(i in 1:length(Site_ID_ls)){
   if(length(interp_lengths)==1){
     if(is.na(interp_lengths)){
       interp_n <- c(interp_n,0) 
+      g_interp <- ggplot() + theme_void()
     }
   }else{
     interp_n <- c(interp_n,length(interp_lengths))
+    # Get the distribution of precipitation interpolation length
+    g_interp <- ggplot(data = data.frame(interp_lengths),
+                       aes(x=Freq))+
+      geom_histogram(fill = my_color[6],color="black")+
+      geom_vline(xintercept = mean(interp_lengths),color="red",linetype = "dashed")+
+      annotate("text",x=mean(interp_lengths),
+               y = Inf,
+               label=paste("mean =",round(mean(interp_lengths),2)),
+               hjust = -0.1,
+               vjust = 1.4)+
+      my_theme+
+      labs(x = "Interp length (days)",y="count")
   }
   # Get the mean interpolation interval
   interp_interval_mean <- c(interp_interval_mean,mean(interp_lengths))
@@ -100,26 +113,21 @@ for(i in 1:length(Site_ID_ls)){
   g_hist_P_no0 <- Hist_plot("precipitation",Site_df,TRUE)
   g_hist_Q_no0 <- Hist_plot("discharge",Site_df,TRUE)
 
-  # Get the distribution of precipitation interpolation length
-  g_interp <- ggplot(data = data.frame(interp_lengths),
-              aes(x=Freq))+
-    geom_histogram(fill = my_color[6],color="black")+
-    geom_vline(xintercept = mean(interp_lengths),color="red",linetype = "dashed")+
-    annotate("text",x=mean(interp_lengths),
-             y = Inf,
-             label=paste("mean =",round(mean(interp_lengths),2)),
-             hjust = -0.1,
-             vjust = 1.4)+
-    my_theme+
-    labs(x = "Interp length (days)",y="count")
-
   # Combine figures together
-  g <- plot_grid(g_Q,g_hist_Q,g_hist_Q_no0,
-                 g_P,g_hist_P,g_hist_P_no0,
-                 rel_widths = c(1,0.5,0.5),
-                 nrow=2,align="hv",axis="tblr")
+  # Make a blank figure
+  g_blank <- ggplot() + theme_void()
+  g <- plot_grid(g_Q,g_hist_Q,g_hist_Q_no0,g_blank,
+                      g_P,g_hist_P,g_hist_P_no0,g_interp,
+                      nrow = 2,
+                      align = "hv",
+                      axis="btlr",
+                      rel_widths = c(1,0.5,0.5,0.5))
   g_all[[i]] <- g
 }
+
+# Combine figures for all sites
+g_all <- plot_grid(plotlist = g_all,ncol=1)
+print_g(g_all,"Data_summary",14,6*15)
 
 # Put interpolation info into a df
 # Note: since no interpolated Q, so only did this for precipitation
@@ -134,5 +142,4 @@ summary_stat <- summary_stat %>%
   right_join(interp_summary_df,by="site_code")
 # Output this summary table
 write.csv(summary_stat,here(Output_path,"Site_summary.csv"))
-
 
