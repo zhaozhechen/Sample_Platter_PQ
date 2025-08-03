@@ -1,5 +1,5 @@
 # Author: Zhaozhe Chen
-# Date: 2025.8.1
+# Update Date: 2025.8.3
 
 # This codes processes Macroshed dataset for TE analysis
 
@@ -14,9 +14,8 @@ Input_path <- here("../../../Data/")
 Output_path <- here("../Results/")
 # Source functions
 source(here("Functions.R"))
-# Colors
-my_color <- brewer.pal(5,"Dark2")
-
+# Colors for plotting
+my_color <- brewer.pal(6,"Dark2")
 
 # ------- Main ---------
 # Read in Macroshed dataset
@@ -32,6 +31,10 @@ MS_df <- MS_data %>%
          var == "discharge"|var == "precipitation")
 
 # Get summary statistics of the dataset
+# Q_n_total is the total observation of Q
+# Q_stats1_pt is the percentage of questionable Q
+# Q_interp1_pt is the percentage of interpolated Q
+# Similarly for P
 summary_stat <- MS_df %>%
   group_by(site_code,var) %>%
   summarise(
@@ -55,7 +58,7 @@ summary_stat <- MS_df %>%
 interp_n <- c()
 interp_interval_mean <- c()
 interp_interval_median <- c()
-# Initiliaze a list to store output figures
+# Initialize a list to store output figures
 g_all <- list()
 # Loop over all sites
 for(i in 1:length(Site_ID_ls)){
@@ -82,22 +85,38 @@ for(i in 1:length(Site_ID_ls)){
   # Get the median interpolation interval
   interp_interval_median <- c(interp_interval_median,median(interp_lengths))
   
+  # Get P interpolated percentage at this site
+  P_interp_pt <- summary_stat$P_interp1_pt[summary_stat$site_code == Site_ID]
+  
   # Make a TS plot of Q and P
-  g_P <- TS_plot("precipitation",Site_df,Site_ID)
-  g_Q <- TS_plot("discharge",Site_df,Site_ID)
+  g_P <- TS_plot("precipitation",Site_df,paste(Site_ID,"P interpolation = ",P_interp_pt,"%"))
+  g_Q <- TS_plot("discharge",Site_df,paste(Site_ID,"Q interpolation = 0%"))
   
   # Get the distribution of P and Q
-  g_hist_P <- Hist_plot("precipitation",Site_df)
-  g_hist_Q <- Hist_plot("discharge",Site_df)
+  g_hist_P <- Hist_plot("precipitation",Site_df,FALSE)
+  g_hist_Q <- Hist_plot("discharge",Site_df,FALSE)
 
   # Distribution after removing 0
-  
-  # Make the distribution of precipitation interpolation length
-  
-  # Combine them together
-  
-  g <- plot_grid(g_Q,g_hist_Q,
-                 g_P,g_hist_P,
+  g_hist_P_no0 <- Hist_plot("precipitation",Site_df,TRUE)
+  g_hist_Q_no0 <- Hist_plot("discharge",Site_df,TRUE)
+
+  # Get the distribution of precipitation interpolation length
+  g_interp <- ggplot(data = data.frame(interp_lengths),
+              aes(x=Freq))+
+    geom_histogram(fill = my_color[6],color="black")+
+    geom_vline(xintercept = mean(interp_lengths),color="red",linetype = "dashed")+
+    annotate("text",x=mean(interp_lengths),
+             y = Inf,
+             label=paste("mean =",round(mean(interp_lengths),2)),
+             hjust = -0.1,
+             vjust = 1.4)+
+    my_theme+
+    labs(x = "Interp length (days)",y="count")
+
+  # Combine figures together
+  g <- plot_grid(g_Q,g_hist_Q,g_hist_Q_no0,
+                 g_P,g_hist_P,g_hist_P_no0,
+                 rel_widths = c(1,0.5,0.5),
                  nrow=2,align="hv",axis="tblr")
   g_all[[i]] <- g
 }

@@ -1,3 +1,7 @@
+# Author: Zhaozhe Chen
+# Update date: 2025.8.3
+# This code includes functions for Sampler Platter project PQ analysis
+
 library(dplyr)
 library(ggplot2)
 library(cowplot)
@@ -24,7 +28,6 @@ interpolated_interval <- function(varname,df){
   }
   return(segment_length)
 }
-
 
 # Theme for all plots
 my_theme <- theme(
@@ -59,8 +62,8 @@ print_g <- function(g,title,w,h){
 # Input include
 # varname: name for the variable to investigate
 # df: data frame to process
-# Site_ID: Site code
-TS_plot <- function(varname,df,Site_ID){
+# my_title: Title for the plot
+TS_plot <- function(varname,df,my_title){
   # Keep target variable
   df_tmp <- df %>%
     filter(var == varname) %>%
@@ -71,7 +74,7 @@ TS_plot <- function(varname,df,Site_ID){
       #geom_line(color=my_color[3])+
       my_theme+
       labs(x = "",y="Q",color="")+
-      ggtitle(Site_ID)
+      ggtitle(my_title)
   }else if(varname == "precipitation"){
     g <- ggplot(data = df_tmp,aes(x = date,y = val,color=factor(ms_interp)))+
       geom_segment(aes(xend=date,y=0,yend=val))+
@@ -82,7 +85,8 @@ TS_plot <- function(varname,df,Site_ID){
                                     "1" = my_color[2]),
                          labels = c("0" = "Not interpolated",
                                     "1" = "Interpolated"))+
-      theme(legend.position = c(0.85,0.9)) 
+      theme(legend.position = "none")+
+      ggtitle(my_title)
   }
   return(g)
 }
@@ -91,27 +95,40 @@ TS_plot <- function(varname,df,Site_ID){
 # Input include
 # varname: name for the variable to investigate
 # df: data frame to process
-Hist_plot <- function(varname,df){
+# zero_remove: TRUE or FALSE, if zero should be removed before plotting
+Hist_plot <- function(varname,df,zero_remove){
   # Keep target variable
   df_tmp <- df %>%
     filter(var == varname) %>%
     mutate(date = as.Date(date))
+  if(zero_remove){
+    df_tmp <- df_tmp %>%
+      filter(val != 0)
+  }
+  
   if(varname == "discharge"){
     g <- ggplot(data=df_tmp,aes(x=val))+
       geom_histogram(bins = 11,color="black",fill=my_color[3])+
       my_theme+
-      labs(x=varname)
+      labs(x="Q")
   }else if(varname == "precipitation"){
     g <- ggplot(data=df_tmp,aes(x=val,fill=as.factor(ms_interp)))+
-      geom_histogram(bins=11,color="black",alpha=0.7)+
+      geom_histogram(position = "identity",bins=11,color="black",alpha=0.7)+
       scale_fill_manual(values = c("0" = my_color[1],
                                    "1" = my_color[2]),
-                        labels = c("0" = "Not interpolated",
-                                   "1" = "Interpolated"))+
-      theme(legend.position = c(0.7,0.8))+
+                        labels = c("0" = "Not interp",
+                                   "1" = "Interp"))+
+      theme(legend.position = c(0.6,0.8))+
       my_theme+
-      labs(x=varname,fill="")
+      labs(x="P",fill="")
   }
+  
+  if(zero_remove){
+    g <- g +
+      theme(legend.position = "none")+
+      ggtitle("Zero removed")
+  }
+  
   return(g)
 }
 
