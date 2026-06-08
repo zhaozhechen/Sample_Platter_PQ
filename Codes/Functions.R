@@ -529,7 +529,7 @@ TE_lag_plot <- function(TE_df,Type,my_color){
               linetype = "dashed",
               color=my_color[3])+
     my_theme+
-    labs(x = "Lag (days)",y=y_title,color="")
+    labs(x = "Lag (hours)",y=y_title,color="")
   # Get the peak and corresponding lag
   if(Type == "TE"|Type == "MI"|Type == "TEnorm"){
     best_lag <- TE_df$Lag[which.max(TE_df[[varname]])]
