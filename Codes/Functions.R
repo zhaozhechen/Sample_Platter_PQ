@@ -72,14 +72,14 @@ TS_plot <- function(varname,df,my_title){
   df_tmp <- df %>%
     filter(var == varname) %>%
     mutate(date = as.Date(date))
-  if(varname == "discharge"){
+  if(varname == "discharge"|varname == "Q"){
     g <- ggplot(data = df_tmp,aes(x = date,y = val))+
       geom_segment(aes(xend=date,y=0,yend=val),color=my_color[3])+
       #geom_line(color=my_color[3])+
       my_theme+
       labs(x = "",y="Q",color="")+
       ggtitle(my_title)
-  }else if(varname == "precipitation"){
+  }else if(varname == "precipitation"|varname == "P"){
     g <- ggplot(data = df_tmp,aes(x = date,y = val,color=factor(ms_interp)))+
       geom_segment(aes(xend=date,y=0,yend=val))+
       #geom_line()+
