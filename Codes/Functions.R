@@ -37,7 +37,7 @@ interpolated_interval <- function(varname,df){
 my_theme <- theme(
   #axis.line=element_line(color="black"),
   panel.background = element_blank(),
-  panel.border = element_rect(colour="black",fill=NA),
+  panel.border = element_rect(color="black",fill=NA),
   legend.key = element_blank(),
   #legend.key.size = unit(6,"cm"),
   #aspect.ratio = 1/1,
@@ -67,31 +67,12 @@ print_g <- function(g,title,w,h){
 # varname: name for the variable to investigate
 # df: data frame to process
 # my_title: Title for the plot
-TS_plot <- function(varname,df,my_title){
-  # Keep target variable
-  df_tmp <- df %>%
-    filter(var == varname) %>%
-    mutate(date = as.Date(date))
-  if(varname == "discharge"|varname == "Q"){
-    g <- ggplot(data = df_tmp,aes(x = date,y = val))+
-      geom_segment(aes(xend=date,y=0,yend=val),color=my_color[3])+
-      #geom_line(color=my_color[3])+
-      my_theme+
-      labs(x = "",y="Q",color="")+
-      ggtitle(my_title)
-  }else if(varname == "precipitation"|varname == "P"){
-    g <- ggplot(data = df_tmp,aes(x = date,y = val,color=factor(ms_interp)))+
-      geom_segment(aes(xend=date,y=0,yend=val))+
-      #geom_line()+
-      my_theme+
-      labs(x = "",y="P",color="")+
-      scale_color_manual(values = c("0" = my_color[1],
-                                    "1" = my_color[2]),
-                         labels = c("0" = "Not interpolated",
-                                    "1" = "Interpolated"))+
-      theme(legend.position = "none")+
-      ggtitle(my_title)
-  }
+TS_plot <- function(varname,df,my_title,var_color){
+  g <- ggplot(data = df,aes(x = Time,y = .data[[varname]]))+
+    geom_segment(aes(xend=Time,y=0,yend=.data[[varname]]),color=var_color)+
+    my_theme+
+    labs(x = "",y=varname,color="")+
+    ggtitle(my_title)
   return(g)
 }
 
@@ -136,6 +117,53 @@ Hist_plot <- function(varname,df,zero_remove){
   
   return(g)
 }
+
+
+# This function is to make historgram of target variable
+# Input include:
+# df: the dataframe
+# var: varname name
+# n_bin: number of bins
+# zero_remove determines if 0 should be removed before plotting
+# If TRUE, the data is binned into 10 bins, else 11 bins
+plot_hist <- function(df, var, n_bin = 11, zero_remove = FALSE,var_color) {
+  x <- df[[var]]
+  if (zero_remove) {
+    # Keep only positive values
+    plot_df <- df[x > 0, ]
+    
+    p <- ggplot(plot_df, aes(x = .data[[var]])) +
+      geom_histogram(
+        bins = n_bin - 1,
+        color = "black",
+        fill = var_color
+      ) +
+      labs(
+        title = paste0(var, " (0 removed)"),
+        x = var,
+        y = "Count"
+      ) +
+      my_theme
+    
+  } else {
+   plot_df <- df
+
+    p <- ggplot(df, aes(x = .data[[var]])) +
+      geom_histogram(
+        bins=n_bin,
+        color = "black",
+        fill = var_color
+      ) +
+      labs(
+        title = var,
+        x = var,
+        y = "Count"
+      ) +
+      my_theme
+  }
+  return(p)
+}
+
 
 # This function is to deal with outliers before discretization of continuous data
 # Assuming the upper and lower boundaries are always provided for simplification
