@@ -1,5 +1,5 @@
 # Author: Zhaozhe Chen
-# Update Date: 2026.6.8
+# Update Date: 2026.7.6
 
 # This codes conducts TE from P -> Q for selected hourly sites
 
@@ -7,26 +7,30 @@
 library(dplyr)
 library(tidyr)
 library(lubridate)
+# Source functions
+source("Functions.R")
 
 # Data path ==========
 Input_path <- "../../../Data/"
 # Output path
-Output_path <- "../Results/"
-# This Site_ID is just for output
+Output_path <- "../Results/TE_results_sites/"
+
+# --- Below variables need to be revised for each site --------
+# This Site_ID is just for output file name
 Site_ID <- "HB_w3"
-# Data file name
-filename <- "Hubbard_Brook_Alix/precip_discharge_w3.csv"
+if(Site_ID == "HB_w3"){
+  # Data file name
+  filename <- "Hubbard_Brook_Alix/precip_discharge_w3.csv"
+  # Variable names in the dataset ====
+  # Time variable name
+  time_name <- "DATETIME"
+  # Precipitation variable name
+  P_name <- "precip"
+  # Q variable name
+  Q_name <- "avg_discharge"  
+}
 
-# Variable names in the dataset ====
-# Time variable name
-time_name <- "DATETIME"
-# Precipitation variable name
-P_name <- "precip"
-# Q variable name
-Q_name <- "avg_discharge"
-
-# Source functions
-source("Functions.R")
+# --- Above variables need to be revised for each site ------
 
 # Parameters for TE implementation ===============
 n_bin <- 11 # Number of bins for TE discritization of continuous data (e.g., SM)
@@ -42,7 +46,6 @@ set.seed(111)
 # Determines if zero should be adjusted for the Sink and Source variables
 ZFlagSink <- TRUE
 ZFlagSource <- TRUE
-
 # These are folding parameters to deal with extreme values (outliers) in the time series
 # i.e., extreme values will be binned into the first or last bin
 lower_qt <- 0.001
@@ -66,6 +69,11 @@ Site_df <- read.csv(paste0(Input_path,filename)) %>%
     )
   ) %>%
   na.omit()
+
+# Make exploratory plots of the data ==========
+
+
+
 
 # Implement hourly TE calculation ============
 # Timing the TE calculation
