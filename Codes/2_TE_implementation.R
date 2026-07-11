@@ -19,7 +19,9 @@ Output_path <- "../Results/TE_results_sites/"
 # This Site_ID is just for output file name
 #Site_ID <- "HB_w3"
 #Site_ID <- "HB_w8"
-#Site_ID <- "Atlanta"
+#Site_ID <- "Atlanta_2207185"
+#Site_ID <- "Atlanta_2334480"
+Site_ID <- "Atlanta_2335350"
 #Site_ID <- "Baltimore"
 #Site_ID <- "Konza"
 #Site_ID <- "Angelo_DRY_Q_Ts"
@@ -48,7 +50,7 @@ if(Site_ID == "HB_w3"){
   var1_name <- "precip"
   # Q variable name
   var2_name <- "avg_discharge"  
-}else if (Site_ID == "Atlanta"){
+}else if (grepl("Atlanta",Site_ID)){
   # Data file name
   filename <- "Atlanta/Atlanta_USGS_QP_0925.csv"
   # Variable names in the dataset ====
@@ -144,7 +146,17 @@ my_color <- brewer.pal(3,"Set2")
 # ------- Main ---------
 # Data processing ==========
 # Read in dataset
-Site_df <- read.csv(paste0(Input_path,filename)) %>%
+Site_df <- read.csv(paste0(Input_path,filename))
+
+# Filter for Atlanta sites
+if(grepl("Atlanta",Site_ID)){
+  site_NO <- sub(".*_", "", Site_ID)
+  # Select the target site
+  Site_df <- Site_df %>%
+    filter(site_no == site_NO)
+}
+
+Site_df <- Site_df %>%
   # Only select required variables
   select(Time = all_of(time_name),
          var1 = all_of(var1_name),
