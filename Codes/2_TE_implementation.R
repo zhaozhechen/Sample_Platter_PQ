@@ -1,5 +1,5 @@
 # Author: Zhaozhe Chen
-# Update Date: 2026.7.6
+# Update Date: 2026.7.10
 
 # This codes conducts TE from P -> Q for selected hourly sites
 
@@ -25,7 +25,7 @@ Output_path <- "../Results/TE_results_sites/"
 #Site_ID <- "Angelo_DRY_Q_Ts"
 #Site_ID <- "Angelo_ELDER_Q_Ts"
 #Site_ID <- "Angelo_DRY_Ta_Ts"
-Site_ID <- "Angelo_ELDER_Ta_Ts"
+#Site_ID <- "Angelo_ELDER_Ta_Ts"
 
 # File specific var names
 if(Site_ID == "HB_w3"){
@@ -70,14 +70,14 @@ if(Site_ID == "HB_w3"){
   var2_name <- "Q_cfs"  
 } else if (Site_ID == "Konza"){
   # Data file name
-  filename <- "Konza_Erin/Konza_df.csv"
+  filename <- "Konza_Erin/Konza_merged_precip_streamflow_no_missing.csv"
   # Variable names in the dataset ====
   # Time variable name
-  time_name <- "DateTime"
+  time_name <- "datetime"
   # Precipitation variable name
-  var1_name <- "P"
+  var1_name <- "precip_value"
   # Q variable name
-  var2_name <- "Q"  
+  var2_name <- "Discharge_interp"  
 } else if (Site_ID == "Angelo_DRY_Q_Ts"){
   # Data file name
   filename <- "Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv"
