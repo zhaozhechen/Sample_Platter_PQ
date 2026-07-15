@@ -7,6 +7,7 @@
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(zoo)
 # Source functions
 source("Functions.R")
 
@@ -19,15 +20,19 @@ Output_path <- "../Results/TE_results_sites/"
 # This Site_ID is just for output file name
 #Site_ID <- "HB_w3"
 #Site_ID <- "HB_w8"
-#Site_ID <- "Atlanta_2207185"
+Site_ID <- "Atlanta_2207185"
 #Site_ID <- "Atlanta_2334480"
-Site_ID <- "Atlanta_2335350"
+#Site_ID <- "Atlanta_2335350"
 #Site_ID <- "Baltimore"
 #Site_ID <- "Konza"
 #Site_ID <- "Angelo_DRY_Q_Ts"
 #Site_ID <- "Angelo_ELDER_Q_Ts"
 #Site_ID <- "Angelo_DRY_Ta_Ts"
 #Site_ID <- "Angelo_ELDER_Ta_Ts"
+
+# Window size for anomaly calculation
+# 5-day moving window (120 hours)
+window_size <- 24 * 5
 
 # File specific var names
 if(Site_ID == "HB_w3"){
@@ -173,6 +178,32 @@ Site_df <- Site_df %>%
     )
   ) %>%
   na.omit()
+
+# Detrend hourly TS using 5-day windows -------------------
+# Get 5-day moving window average
+
+Site_df <- Site_df %>%
+  arrange(Time) %>%
+  mutate(
+    var1_smooth = rollapply(
+      var1,
+      width = window_size,
+      FUN = mean,
+      fill = NA,
+      align = "center",
+      partial = TRUE
+    ),
+    var2_smooth = rollapply(
+      var2,
+      width = window_size,
+      FUN = mean,
+      fill = NA,
+      align = "center",
+      partial = TRUE
+    ),
+    var1_anom = var1 - var1_smooth,
+    var2_anom = var2 - var2_smooth
+  )
 
 # Make exploratory plots of the data ==========
 # Time series of P and Q

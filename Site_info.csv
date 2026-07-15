@@ -1,0 +1,8 @@
+﻿Site_ID,filename,time_name,source_name,sink_name,filter,site_NO
+Angelo_DRY_ta_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,DRY_air_temp,DRY_temp_C,,
+Angelo_DRY_Q_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,DRY_discharge_cms,DRY_temp_C,,
+Angelo_ELDER_ta_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,ELDER_air_temp,ELDER_temp_C,,
+Angelo_ELDER_Q_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,ELDER_discharge_cms,ELDER_temp_C,,
+Atlanta_CC_PQ_anomaly,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,1,2207185
+Atlanta_RC_PQ_anomaly,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,1,2334480
+Atlanta_NF_PQ_anomaly,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,1,2335350

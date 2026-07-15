@@ -594,3 +594,74 @@ lag_plots_all <- function(TE_df,my_title){
   return(g_info)
 }
 
+
+# This function is a wrapper function to run TE analysis and produce plots
+# Input should include:
+# Site_df: df including 2 matching columns of source var and sink var
+# source_name
+# sink_name
+# Site_ID is just the name for output, doesn't have to be real name
+
+run_TE <- function(Site_ID,Site_df,source_name,sink_name){
+  
+  # Make exploratory plots of the data ==========
+  # Time series of P and Q
+  g_P_TS <- TS_plot(source_name,Site_df,Site_ID,my_color[3])+
+    labs(y = source_name)
+  g_Q_TS <- TS_plot(sink_name,Site_df,Site_ID,my_color[2])+
+    labs(y = sink_name)
+  # Histograms of P and Q
+  g_P_hist <- plot_hist(Site_df,source_name,n_bin=11,zero_remove = FALSE,my_color[3])+
+    labs(y = source_name)
+  g_P_hist_no0 <- plot_hist(Site_df,source_name,n_bin=11,zero_remove = TRUE,my_color[3])+
+    labs(y = source_name)
+  g_Q_hist <- plot_hist(Site_df,sink_name,n_bin = 11,zero_remove = FALSE,my_color[2])+
+    labs(y = sink_name)
+  g_Q_hist_no0 <- plot_hist(Site_df,sink_name,n_bin = 11,zero_remove = TRUE,my_color[2])+
+    labs(y = sink_name)
+  
+  # Combine these plots
+  g_data <- plot_grid(g_P_TS,g_P_hist,g_P_hist_no0,
+                      g_Q_TS,g_Q_hist,g_Q_hist_no0,
+                      nrow=2,align="hv",axis="btlr",
+                      rel_widths = c(1,0.5,0.5))
+  
+  # Implement hourly TE calculation ============
+  # Timing the TE calculation
+  start_time <- Sys.time()
+  # Run TE
+  TE_df <- Cal_TE_MI_main(Source = Site_df[[source_name]],
+                          Sink = Site_df[[sink_name]],
+                          nbins = n_bin,
+                          Maxlag = max_lag,
+                          alpha = alpha,
+                          nshuffle = nshuffle,
+                          upper_qt = upper_qt,
+                          lower_qt = lower_qt,
+                          ZFlagSource = ZFlagSource,
+                          ZFlagSink = ZFlagSink,
+                          Lag_Dependent_Crit = Lag_Dependent_Crit)
+  end_time <- Sys.time()
+  run_time <- end_time - start_time
+  message(run_time)
+  
+  # Make TE vs lag plot
+  g_TE <- lag_plots_all(TE_df,Site_ID)
+  
+  # Output TE df
+  write.csv(TE_df,paste0(Output_path,"/TE_df_",Site_ID,".csv"))
+  
+  # Combine all figures
+  g_all <- plot_grid(g_data,g_TE,nrow=2,
+                     align="hv",axis="tblr",
+                     rel_heights = c(2,1))
+  
+  # Output TE plot
+  print_g(g_all,
+          paste0("TE_lag_",Site_ID),
+          16,12)
+  message("TE analysis done")
+}
+
+
+
