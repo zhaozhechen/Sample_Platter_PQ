@@ -11,11 +11,11 @@ library(zoo)
 # Source functions
 source("Functions.R")
 
-# 2 G maximum allowed size
-options(future.globals.maxSize = 3 * 1024^3) 
+# 6 G maximum allowed size
+options(future.globals.maxSize = 4 * 1024^3) 
 
 # Decide which site to process
-for(arrayid in 15:16){
+for(arrayid in 16){
   # Parameters for TE implementation ===============
   n_bin <- 11 # Number of bins for TE discritization of continuous data (e.g., SM)
   # Consider 3 days
