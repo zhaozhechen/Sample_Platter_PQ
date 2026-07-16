@@ -601,24 +601,25 @@ lag_plots_all <- function(TE_df,my_title){
 # source_name
 # sink_name
 # Site_ID is just the name for output, doesn't have to be real name
-
-run_TE <- function(Site_ID,Site_df,source_name,sink_name){
+# source_varname is name for source (for labels)
+# sink_varname is name for sink (for labels)
+run_TE <- function(Site_ID,Site_df,source_name,sink_name,source_varname,sink_varname){
   
   # Make exploratory plots of the data ==========
   # Time series of P and Q
   g_P_TS <- TS_plot(source_name,Site_df,Site_ID,my_color[3])+
-    labs(y = source_name)
+    labs(y = source_varname)+ggtitle(source_varname)
   g_Q_TS <- TS_plot(sink_name,Site_df,Site_ID,my_color[2])+
-    labs(y = sink_name)
+    labs(y = sink_varname)+ggtitle(sink_varname)
   # Histograms of P and Q
   g_P_hist <- plot_hist(Site_df,source_name,n_bin=11,zero_remove = FALSE,my_color[3])+
-    labs(y = source_name)
+    labs(y = source_varname)+ggtitle("")
   g_P_hist_no0 <- plot_hist(Site_df,source_name,n_bin=11,zero_remove = TRUE,my_color[3])+
-    labs(y = source_name)
+    labs(y = source_varname)+ggtitle("0 removed")
   g_Q_hist <- plot_hist(Site_df,sink_name,n_bin = 11,zero_remove = FALSE,my_color[2])+
-    labs(y = sink_name)
+    labs(y = sink_varname)+ggtitle("")
   g_Q_hist_no0 <- plot_hist(Site_df,sink_name,n_bin = 11,zero_remove = TRUE,my_color[2])+
-    labs(y = sink_name)
+    labs(y = sink_varname)+ggtitle("0 removed")
   
   # Combine these plots
   g_data <- plot_grid(g_P_TS,g_P_hist,g_P_hist_no0,
@@ -646,7 +647,7 @@ run_TE <- function(Site_ID,Site_df,source_name,sink_name){
   message(run_time)
   
   # Make TE vs lag plot
-  g_TE <- lag_plots_all(TE_df,Site_ID)
+  g_TE <- lag_plots_all(TE_df,paste(Site_Name,source_varname,"->",sink_varname))
   
   # Output TE df
   write.csv(TE_df,paste0(Output_path,"/TE_df_",Site_ID,".csv"))

@@ -1,8 +1,13 @@
-﻿Site_ID,filename,time_name,source_name,sink_name,filter,site_NO
-Angelo_DRY_ta_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,DRY_air_temp,DRY_temp_C,,
-Angelo_DRY_Q_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,DRY_discharge_cms,DRY_temp_C,,
-Angelo_ELDER_ta_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,ELDER_air_temp,ELDER_temp_C,,
-Angelo_ELDER_Q_ts_anomaly,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,ELDER_discharge_cms,ELDER_temp_C,,
-Atlanta_CC_PQ_anomaly,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,1,2207185
-Atlanta_RC_PQ_anomaly,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,1,2334480
-Atlanta_NF_PQ_anomaly,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,1,2335350
+﻿Site_ID,Site_Name,filename,time_name,source_name,sink_name,filter,site_NO,source_anomaly,sink_anomaly,source_varname,sink_varname
+Angelo_DRY_ta_ts,Angelo DRY,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,DRY_air_temp,DRY_temp_C,,,1,1,Tair anomaly,Ts anomaly
+Angelo_DRY_Q_ts,Angelo DRY,Angelo_Laurel/CompiledAngeloSamplerPlatter_Hourly.csv,DateTime,DRY_discharge_cms,DRY_temp_C,,,,1,Q,Ts anomaly
+Angelo_ELDER_ta_ts,Angelo ELDER,Angelo_Laurel/Elder_subdaily.csv,datetime,AirT_C,WaterT_C,,,1,1,Tair anomaly,Ts anomaly
+Angelo_ELDER_Q_ts,Angelo ELDER,Angelo_Laurel/Elder_subdaily.csv,datetime,Q_cfs,WaterT_C,,,,1,Q,Ts anomaly
+Angelo_ELDER_P_Q,Angelo ELDER,Angelo_Laurel/Elder_subdaily.csv,datetime,P_mm,Q_cfs,,,,,P,Q
+Atlanta_CC_P_Q,Atlanta Crooked Creek,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,,2335350,,,P,Q
+Atlanta_RC_P_Q,Atlanta Richland Creek,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,,2334480,,,P,Q
+Atlanta_NB_P_Q,Atlanta No Bussiness,Atlanta/Atlanta_USGS_QP_0925.csv,dateTime,Precip_Inst,Flow_Inst,,2207185,,,P,Q
+Atlanta_CC_Q_SSC,Atlanta Crooked Creek,Atlanta/Atlanta_USGS_QPSSC_0925.csv,dateTime,Flow_Inst,SpecCond_Inst,,2335350,,,Q,SSC
+Atlanta_RC_Q_SSC,Atlanta Richland Creek,Atlanta/Atlanta_USGS_QPSSC_0925.csv,dateTime,Flow_Inst,SpecCond_Inst,,2334480,,,Q,SSC
+Atlanta_NB_Q_SSC,Atlanta No Bussiness,Atlanta/Atlanta_USGS_QPSSC_0925.csv,dateTime,Flow_Inst,SpecCond_Inst,,2207185,,,Q,SSC
+Baltimore_P_Q,Baltimore,Baltimore/BES_USGS_QP_0917.csv,DateTime_EST_rnd,Precip_mm,Q_cfs,,,,,P,Q
