@@ -11,3 +11,7 @@ Atlanta_CC_Q_SSC,Atlanta Crooked Creek,Atlanta/Atlanta_USGS_QPSSC_0925.csv,dateT
 Atlanta_RC_Q_SSC,Atlanta Richland Creek,Atlanta/Atlanta_USGS_QPSSC_0925.csv,dateTime,Flow_Inst,SpecCond_Inst,,2334480,,,Q,SSC
 Atlanta_NB_Q_SSC,Atlanta No Bussiness,Atlanta/Atlanta_USGS_QPSSC_0925.csv,dateTime,Flow_Inst,SpecCond_Inst,,2207185,,,Q,SSC
 Baltimore_P_Q,Baltimore,Baltimore/BES_USGS_QP_0917.csv,DateTime_EST_rnd,Precip_mm,Q_cfs,,,,,P,Q
+HB_w3_P_Q_full,HB_w3,Hubbard_Brook_Alix/precip_discharge_w3.csv,DATETIME,precip,avg_discharge,,,,,P,Q
+HB_w3_P_Q_GS,HB_w3,Hubbard_Brook_Alix/precip_discharge_w3.csv,DATETIME,precip,avg_discharge,GS,,,,P,Q
+HB_w8_P_Q_full,HB_w8,Hubbard_Brook_Alix/precip_discharge_w8.csv,DATETIME,precip,avg_discharge,,,,,P,Q
+HB_w8_P_Q_GS,HB_w8,Hubbard_Brook_Alix/precip_discharge_w8.csv,DATETIME,precip,avg_discharge,GS,,,,P,Q

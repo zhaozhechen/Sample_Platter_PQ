@@ -15,7 +15,7 @@ source("Functions.R")
 options(future.globals.maxSize = 3 * 1024^3) 
 
 # Decide which site to process
-for(arrayid in 12){
+for(arrayid in 15:16){
   # Parameters for TE implementation ===============
   n_bin <- 11 # Number of bins for TE discritization of continuous data (e.g., SM)
   # Consider 3 days
@@ -60,7 +60,7 @@ for(arrayid in 12){
   sink_name <- site_info$sink_name[arrayid]
   # site no, specific for Atlanta sites
   site_NO <- site_info$site_NO[arrayid]
-  # Trunk data, just for faster run
+  # Filter data for growing season
   site_filter <- site_info$filter[arrayid]
   # Whether should use anomaly for source variable
   source_anomaly <- site_info$source_anomaly[arrayid]
@@ -80,13 +80,6 @@ for(arrayid in 12){
       filter(site_no == site_NO)
   }
   
-  # Filter for sites are too long
-  if(!is.na(site_filter)){
-    Site_df <- Site_df %>%
-      # This is for testing only. Cut some time for faster running
-      slice_head(n = 500000)
-  }
-  
   Site_df <- Site_df %>%
     # Only select required variables
     select(Time = all_of(time_name),
@@ -104,6 +97,23 @@ for(arrayid in 12){
       )
     ) %>%
     na.omit()
+  
+  # Apply optional seasonal filtering
+  if (!is.na(site_filter)) {
+    
+    if (site_filter == "GS") {
+      # Keep April through October
+      Site_df <- Site_df %>%
+        filter(month(Time) %in% 4:10)
+      
+    } else {
+      warning(
+        "Unknown site_filter value: ",
+        site_filter,
+        ". No filtering was applied."
+      )
+    }
+  }
   
   # Detrend hourly TS using 5-day windows =========
   # Get 5-day moving window average
