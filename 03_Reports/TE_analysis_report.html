@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sampler Platter Transfer-Entropy Results</title>
+<style>body{margin:0;background:#f4f7f8;color:#24303a;font-family:Segoe UI,Arial,sans-serif;line-height:1.6}main{width:min(1320px,calc(100% - 32px));margin:32px auto;padding:48px 56px;background:#fff;border:1px solid #d9e1e5;border-radius:12px;box-shadow:0 8px 28px rgba(36,48,58,.08)}h1,h2,h3{line-height:1.25}h1{margin:0 0 8px;font-size:2.25rem}h2{margin-top:42px;padding-bottom:8px;border-bottom:2px solid #e8f4f0}h3{margin-top:34px;color:#176f61}.subtitle{color:#61717d}.notice{margin:22px 0;padding:14px 18px;background:#e8f4f0;border-left:4px solid #2a8f78;border-radius:4px}.table-wrap{overflow-x:auto}table{width:100%;margin:16px 0 24px;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.92rem}th,td{padding:8px 10px;border:1px solid #d9e1e5;text-align:right;vertical-align:top}th{background:#f0f5f6;white-space:nowrap}th:first-child,td:first-child{text-align:left}code{padding:2px 5px;background:#f0f3f4;border-radius:4px;font-family:Consolas,monospace}img{display:block;width:100%;height:auto;margin:22px auto;border:1px solid #d9e1e5}a{color:#176f61}.analysis{margin-top:38px;padding-top:6px}.meta{padding:14px 18px;background:#f8fafb;border:1px solid #d9e1e5;border-radius:6px}.outputs{columns:3}.outputs li{margin-bottom:7px;break-inside:avoid}@media(max-width:760px){main{padding:28px 22px}.outputs{columns:1}}@media print{body{background:white}main{width:100%;margin:0;padding:0;border:0;box-shadow:none}}</style></head><body><main>
+<h1>Sampler Platter Transfer-Entropy Results</h1>
+<p class="subtitle">Generated August 24, 2026</p>
+<div class="notice">This report summarizes all configured site and variable-pair analyses, their native temporal resolution, record coverage, and TE results.</div>
+<h2>Methods</h2>
+<p>Each analysis evaluates lags 0 through 72 in native observation steps. Tables and figure x-axes convert those steps to hours using the native timestamp interval, so the temporal coverage varies by dataset resolution.</p>
+<p>TE algorithm uses histogram discretization, quantile-folded extremes, optional structural-zero bins, and 300 shuffled null realizations. </p>
+<div class="notice"><strong>Q to stream temperature:</strong> observations with missing Q or Q equal to zero are excluded from TE. Their timestamps are not collapsed, so lag windows cannot connect values across those gaps. Q=0 periods are shaded in both time-series panels.</div>
+<p>Temperature analyses use five-day same-clock anomalies. Hubbard Brook growing-season runs retain April through October. </p>
+<h2>Metrics</h2>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Meaning</th></tr></thead><tbody><tr><td>TE</td><td>Directional information from lagged source to sink, in bits.</td></tr><tr><td>TE threshold</td><td>Shuffled critical value used to flag TE above the null reference.</td></tr><tr><td>Normalized TE</td><td>TE divided by sink entropy and multiplied by 100.</td></tr><tr><td>MI</td><td>Non-directional mutual information between lagged source and current sink.</td></tr><tr><td>Correlation</td><td>Pearson correlation between lagged source and current sink.</td></tr><tr><td>Cumulative TE</td><td>Sum of significant normalized TE values divided by the 72 lag steps; reported as percent uncertainty reduction.</td></tr></tbody></table></div>
+<h2>Results summary</h2>
+<div class="table-wrap"><table><thead><tr><th>Site</th><th>Variable_pair</th><th>Resolution_minutes</th><th>Observations</th><th>Q_zero_excluded</th><th>Start</th><th>End</th><th>Peak_normalized_TE_percent</th><th>Peak_lag_hours</th><th>Peak_significant</th><th>Cumulative_normalized_TE_percent</th><th>Notes</th></tr></thead><tbody><tr><td>Angelo DRY</td><td>Air temperature anomaly -&gt; Stream temperature anomaly</td><td>60</td><td>40592</td><td>0</td><td>2015-12-03</td><td>2020-07-20</td><td>2.3355690</td><td>1.00</td><td>Yes</td><td>0.14353569</td><td>Same hourly file and anomaly choice as prior v3 analysis</td></tr><tr><td>Angelo DRY</td><td>Discharge -&gt; Stream temperature anomaly</td><td>60</td><td>27743</td><td>12860</td><td>2015-12-03</td><td>2020-06-26</td><td>0.3773150</td><td>1.00</td><td>No</td><td>0.00000000</td><td>Same hourly file and sink anomaly choice as prior v3 analysis; excluded 12860 Q=0 observations from TE and retained their timestamps as gaps No TE value exceeded the shuffled threshold.</td></tr><tr><td>Angelo ELDER</td><td>Air temperature anomaly -&gt; Stream temperature anomaly</td><td>30</td><td>172456</td><td>0</td><td>2013-05-10</td><td>2023-04-24</td><td>1.4334904</td><td>1.00</td><td>Yes</td><td>0.22444199</td><td>Same Elder_subdaily file and anomaly choice as prior v3 analysis</td></tr><tr><td>Angelo ELDER</td><td>Discharge -&gt; Stream temperature anomaly</td><td>30</td><td>172798</td><td>0</td><td>2013-05-10</td><td>2023-04-24</td><td>0.0388915</td><td>23.00</td><td>No</td><td>0.00000000</td><td>Same Elder_subdaily file and sink anomaly choice as prior v3 analysis No TE value exceeded the shuffled threshold.</td></tr><tr><td>Angelo ELDER</td><td>Precipitation -&gt; Discharge</td><td>30</td><td>172800</td><td>0</td><td>2013-05-08</td><td>2023-04-26</td><td>0.7763364</td><td>1.50</td><td>Yes</td><td>0.20743877</td><td>Same Elder_subdaily file as prior v3 analysis</td></tr><tr><td>Atlanta No Business</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>298268</td><td>0</td><td>2009-10-01</td><td>2025-09-02</td><td>1.3340968</td><td>0.50</td><td>Yes</td><td>0.29981132</td><td>Three-site split and P-Q file retained from the 2026-07-10 update</td></tr><tr><td>Atlanta Richland Creek</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>323921</td><td>0</td><td>2015-10-01</td><td>2025-09-02</td><td>1.6796020</td><td>1.00</td><td>Yes</td><td>0.40853203</td><td>Three-site split and P-Q file retained from the 2026-07-10 update</td></tr><tr><td>Atlanta Crooked Creek</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>319431</td><td>0</td><td>2015-10-01</td><td>2025-09-02</td><td>4.2525673</td><td>1.00</td><td>Yes</td><td>0.65782161</td><td>Three-site split and P-Q file retained from the 2026-07-10 update</td></tr><tr><td>Atlanta No Business</td><td>Discharge -&gt; Stream temperature anomaly</td><td>15</td><td>517247</td><td>0</td><td>2009-10-03</td><td>2025-09-29</td><td>0.0174761</td><td>2.75</td><td>No</td><td>0.00000000</td><td>Q and temperature merged by UTC timestamp; no reverse temperature-to-Q analysis No TE value exceeded the shuffled threshold.</td></tr><tr><td>Atlanta Richland Creek</td><td>Discharge -&gt; Stream temperature anomaly</td><td>15</td><td>543940</td><td>0</td><td>2009-10-03</td><td>2025-09-29</td><td>0.0265163</td><td>0.00</td><td>No</td><td>0.00000000</td><td>Q and temperature merged by UTC timestamp; no reverse temperature-to-Q analysis No TE value exceeded the shuffled threshold.</td></tr><tr><td>Atlanta Crooked Creek</td><td>Discharge -&gt; Stream temperature anomaly</td><td>15</td><td>495499</td><td>0</td><td>2009-10-03</td><td>2025-09-29</td><td>0.0745576</td><td>0.00</td><td>Yes</td><td>0.00189311</td><td>Q and temperature merged by UTC timestamp; no reverse temperature-to-Q analysis</td></tr><tr><td>Atlanta No Business</td><td>Precipitation -&gt; Specific conductivity</td><td>15</td><td>500869</td><td>0</td><td>2009-10-01</td><td>2025-10-01</td><td>0.3282092</td><td>0.50</td><td>Yes</td><td>0.05334802</td><td>P and conductivity from the combined Atlanta Q-P-conductivity file</td></tr><tr><td>Atlanta Richland Creek</td><td>Precipitation -&gt; Specific conductivity</td><td>15</td><td>514417</td><td>0</td><td>2009-10-01</td><td>2025-10-01</td><td>0.5089334</td><td>0.25</td><td>Yes</td><td>0.08030025</td><td>P and conductivity from the combined Atlanta Q-P-conductivity file</td></tr><tr><td>Atlanta Crooked Creek</td><td>Precipitation -&gt; Specific conductivity</td><td>15</td><td>520925</td><td>0</td><td>2009-10-01</td><td>2025-10-01</td><td>0.4575944</td><td>1.25</td><td>Yes</td><td>0.10992717</td><td>P and conductivity from the combined Atlanta Q-P-conductivity file</td></tr><tr><td>Atlanta No Business</td><td>Specific conductivity -&gt; Stream temperature anomaly</td><td>15</td><td>538378</td><td>0</td><td>2009-10-03</td><td>2025-09-29</td><td>0.0590968</td><td>5.50</td><td>No</td><td>0.00000000</td><td>Conductivity and temperature merged by UTC timestamp No TE value exceeded the shuffled threshold.</td></tr><tr><td>Atlanta Richland Creek</td><td>Specific conductivity -&gt; Stream temperature anomaly</td><td>15</td><td>540483</td><td>0</td><td>2009-10-03</td><td>2025-09-29</td><td>0.0392354</td><td>0.00</td><td>No</td><td>0.00000000</td><td>Conductivity and temperature merged by UTC timestamp No TE value exceeded the shuffled threshold.</td></tr><tr><td>Atlanta Crooked Creek</td><td>Specific conductivity -&gt; Stream temperature anomaly</td><td>15</td><td>537370</td><td>0</td><td>2009-10-03</td><td>2025-09-29</td><td>0.0552097</td><td>0.00</td><td>No</td><td>0.00000000</td><td>Conductivity and temperature merged by UTC timestamp No TE value exceeded the shuffled threshold.</td></tr><tr><td>Baltimore</td><td>Precipitation -&gt; Discharge</td><td>5</td><td>852425</td><td>0</td><td>2009-05-11</td><td>2017-12-22</td><td>1.9587409</td><td>1.50</td><td>Yes</td><td>0.62577571</td><td>Same BES_USGS_QP_0917 file as prior v3 analysis</td></tr><tr><td>Hubbard Brook W3 (all series)</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>432998</td><td>0</td><td>2011-08-26</td><td>2023-12-31</td><td>1.1223861</td><td>0.00</td><td>Yes</td><td>0.23728600</td><td>Full-series version requested; same file as prior v3 analysis</td></tr><tr><td>Hubbard Brook W3 (growing season)</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>252902</td><td>0</td><td>2011-08-26</td><td>2023-10-31</td><td>1.1918650</td><td>0.00</td><td>Yes</td><td>0.24672470</td><td>April through October; same file as prior v3 analysis</td></tr><tr><td>Hubbard Brook W8 (all series)</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>1919853</td><td>0</td><td>1968-05-01</td><td>2023-12-31</td><td>0.8156071</td><td>0.50</td><td>Yes</td><td>0.21099034</td><td>Full-series version requested; same file as prior v3 metadata</td></tr><tr><td>Hubbard Brook W8 (growing season)</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>1123147</td><td>0</td><td>1968-05-01</td><td>2023-10-31</td><td>0.8356240</td><td>0.50</td><td>Yes</td><td>0.19759708</td><td>April through October; same file as prior v3 metadata</td></tr><tr><td>Konza</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>516106</td><td>0</td><td>2010-03-19</td><td>2024-12-31</td><td>0.1533047</td><td>0.00</td><td>Yes</td><td>0.02791912</td><td>Updated interpolated-Q file specified in the 2026-07-10 analysis log</td></tr><tr><td>Starkey</td><td>Precipitation -&gt; Discharge</td><td>15</td><td>425068</td><td>0</td><td>2011-07-11</td><td>2024-05-01</td><td>0.0232907</td><td>7.25</td><td>No</td><td>0.00000000</td><td>Same merged P-Q file used in the prior Starkey v3 analysis No TE value exceeded the shuffled threshold.</td></tr><tr><td>H.J. Andrews GSWS02</td><td>Precipitation -&gt; Discharge</td><td>30</td><td>397989</td><td>0</td><td>1957-10-01</td><td>2018-10-01</td><td>1.0619156</td><td>0.50</td><td>Yes</td><td>0.22702312</td><td>GSWS02 was the H.J. Andrews reference site in the earlier common P-Q selection; new Keith processed file</td></tr></tbody></table></div>
+<section class="analysis"><h3>1. Angelo DRY: Air temperature anomaly -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Angelo_DRY_Tair_Tstream<br><strong>Data notes:</strong> Same hourly file and anomaly choice as prior v3 analysis</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>60 minutes</td></tr><tr><td>Complete TE observations</td><td>40592</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1449100800</td></tr><tr><td>End</td><td>1595286000</td></tr><tr><td>Maximum lag</td><td>72 steps (72 hours)</td></tr><tr><td>Peak normalized TE</td><td>2.33557 %</td></tr><tr><td>Peak lag</td><td>1 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>6</td></tr><tr><td>Cumulative normalized TE</td><td>0.143536 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Angelo_DRY_Tair_Tstream.png" alt="TE diagnostic figure for Angelo_DRY_Tair_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Angelo_DRY_Tair_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_DRY_Tair_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_DRY_Tair_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>2. Angelo DRY: Discharge -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Angelo_DRY_Q_Tstream<br><strong>Data notes:</strong> Same hourly file and sink anomaly choice as prior v3 analysis; excluded 12860 Q=0 observations from TE and retained their timestamps as gaps No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>60 minutes</td></tr><tr><td>Complete TE observations</td><td>27743</td></tr><tr><td>Q=0 observations excluded</td><td>12860</td></tr><tr><td>Start</td><td>1449136800</td></tr><tr><td>End</td><td>1593162000</td></tr><tr><td>Maximum lag</td><td>72 steps (72 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.377315 %</td></tr><tr><td>Peak lag</td><td>1 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Angelo_DRY_Q_Tstream.png" alt="TE diagnostic figure for Angelo_DRY_Q_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Angelo_DRY_Q_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_DRY_Q_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_DRY_Q_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>3. Angelo ELDER: Air temperature anomaly -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Angelo_ELDER_Tair_Tstream<br><strong>Data notes:</strong> Same Elder_subdaily file and anomaly choice as prior v3 analysis</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>30 minutes</td></tr><tr><td>Complete TE observations</td><td>172456</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1368144000</td></tr><tr><td>End</td><td>1682370000</td></tr><tr><td>Maximum lag</td><td>72 steps (36 hours)</td></tr><tr><td>Peak normalized TE</td><td>1.43349 %</td></tr><tr><td>Peak lag</td><td>1 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>20</td></tr><tr><td>Cumulative normalized TE</td><td>0.224442 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Angelo_ELDER_Tair_Tstream.png" alt="TE diagnostic figure for Angelo_ELDER_Tair_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Angelo_ELDER_Tair_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_ELDER_Tair_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_ELDER_Tair_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>4. Angelo ELDER: Discharge -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Angelo_ELDER_Q_Tstream<br><strong>Data notes:</strong> Same Elder_subdaily file and sink anomaly choice as prior v3 analysis No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>30 minutes</td></tr><tr><td>Complete TE observations</td><td>172798</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1368144000</td></tr><tr><td>End</td><td>1682370000</td></tr><tr><td>Maximum lag</td><td>72 steps (36 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0388915 %</td></tr><tr><td>Peak lag</td><td>23 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Angelo_ELDER_Q_Tstream.png" alt="TE diagnostic figure for Angelo_ELDER_Q_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Angelo_ELDER_Q_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_ELDER_Q_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_ELDER_Q_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>5. Angelo ELDER: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> Angelo_ELDER_P_Q<br><strong>Data notes:</strong> Same Elder_subdaily file as prior v3 analysis</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>30 minutes</td></tr><tr><td>Complete TE observations</td><td>172800</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1367971200</td></tr><tr><td>End</td><td>1682542800</td></tr><tr><td>Maximum lag</td><td>72 steps (36 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.776336 %</td></tr><tr><td>Peak lag</td><td>1.5 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>46</td></tr><tr><td>Cumulative normalized TE</td><td>0.207439 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Angelo_ELDER_P_Q.png" alt="TE diagnostic figure for Angelo_ELDER_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Angelo_ELDER_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_ELDER_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Angelo_ELDER_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>6. Atlanta No Business: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_NB_P_Q<br><strong>Data notes:</strong> Three-site split and P-Q file retained from the 2026-07-10 update</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>298268</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254369600</td></tr><tr><td>End</td><td>1756784700</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>1.3341 %</td></tr><tr><td>Peak lag</td><td>0.5 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>73</td></tr><tr><td>Cumulative normalized TE</td><td>0.299811 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_NB_P_Q.png" alt="TE diagnostic figure for Atlanta_NB_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_NB_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>7. Atlanta Richland Creek: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_RC_P_Q<br><strong>Data notes:</strong> Three-site split and P-Q file retained from the 2026-07-10 update</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>323921</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1443672000</td></tr><tr><td>End</td><td>1756784700</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>1.6796 %</td></tr><tr><td>Peak lag</td><td>1 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>73</td></tr><tr><td>Cumulative normalized TE</td><td>0.408532 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_RC_P_Q.png" alt="TE diagnostic figure for Atlanta_RC_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_RC_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>8. Atlanta Crooked Creek: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_CC_P_Q<br><strong>Data notes:</strong> Three-site split and P-Q file retained from the 2026-07-10 update</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>319431</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1443672000</td></tr><tr><td>End</td><td>1756784700</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>4.25257 %</td></tr><tr><td>Peak lag</td><td>1 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>73</td></tr><tr><td>Cumulative normalized TE</td><td>0.657822 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_CC_P_Q.png" alt="TE diagnostic figure for Atlanta_CC_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_CC_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>9. Atlanta No Business: Discharge -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_NB_Q_Tstream<br><strong>Data notes:</strong> Q and temperature merged by UTC timestamp; no reverse temperature-to-Q analysis No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>517247</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254542400</td></tr><tr><td>End</td><td>1759117500</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0174761 %</td></tr><tr><td>Peak lag</td><td>2.75 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_NB_Q_Tstream.png" alt="TE diagnostic figure for Atlanta_NB_Q_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_NB_Q_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_Q_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_Q_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>10. Atlanta Richland Creek: Discharge -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_RC_Q_Tstream<br><strong>Data notes:</strong> Q and temperature merged by UTC timestamp; no reverse temperature-to-Q analysis No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>543940</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254542400</td></tr><tr><td>End</td><td>1759117500</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0265163 %</td></tr><tr><td>Peak lag</td><td>0 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_RC_Q_Tstream.png" alt="TE diagnostic figure for Atlanta_RC_Q_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_RC_Q_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_Q_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_Q_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>11. Atlanta Crooked Creek: Discharge -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_CC_Q_Tstream<br><strong>Data notes:</strong> Q and temperature merged by UTC timestamp; no reverse temperature-to-Q analysis</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>495499</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254542400</td></tr><tr><td>End</td><td>1759117500</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0745576 %</td></tr><tr><td>Peak lag</td><td>0 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>2</td></tr><tr><td>Cumulative normalized TE</td><td>0.00189311 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_CC_Q_Tstream.png" alt="TE diagnostic figure for Atlanta_CC_Q_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_CC_Q_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_Q_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_Q_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>12. Atlanta No Business: Precipitation -&gt; Specific conductivity</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_NB_P_Cond<br><strong>Data notes:</strong> P and conductivity from the combined Atlanta Q-P-conductivity file</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>500869</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254369600</td></tr><tr><td>End</td><td>1759290300</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.328209 %</td></tr><tr><td>Peak lag</td><td>0.5 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>26</td></tr><tr><td>Cumulative normalized TE</td><td>0.053348 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_NB_P_Cond.png" alt="TE diagnostic figure for Atlanta_NB_P_Cond">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_NB_P_Cond.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_P_Cond.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_P_Cond.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>13. Atlanta Richland Creek: Precipitation -&gt; Specific conductivity</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_RC_P_Cond<br><strong>Data notes:</strong> P and conductivity from the combined Atlanta Q-P-conductivity file</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>514417</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254369600</td></tr><tr><td>End</td><td>1759290300</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.508933 %</td></tr><tr><td>Peak lag</td><td>0.25 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>38</td></tr><tr><td>Cumulative normalized TE</td><td>0.0803003 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_RC_P_Cond.png" alt="TE diagnostic figure for Atlanta_RC_P_Cond">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_RC_P_Cond.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_P_Cond.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_P_Cond.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>14. Atlanta Crooked Creek: Precipitation -&gt; Specific conductivity</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_CC_P_Cond<br><strong>Data notes:</strong> P and conductivity from the combined Atlanta Q-P-conductivity file</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>520925</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254374100</td></tr><tr><td>End</td><td>1759290300</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.457594 %</td></tr><tr><td>Peak lag</td><td>1.25 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>36</td></tr><tr><td>Cumulative normalized TE</td><td>0.109927 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_CC_P_Cond.png" alt="TE diagnostic figure for Atlanta_CC_P_Cond">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_CC_P_Cond.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_P_Cond.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_P_Cond.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>15. Atlanta No Business: Specific conductivity -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_NB_Cond_Tstream<br><strong>Data notes:</strong> Conductivity and temperature merged by UTC timestamp No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>538378</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254542400</td></tr><tr><td>End</td><td>1759117500</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0590968 %</td></tr><tr><td>Peak lag</td><td>5.5 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_NB_Cond_Tstream.png" alt="TE diagnostic figure for Atlanta_NB_Cond_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_NB_Cond_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_Cond_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_NB_Cond_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>16. Atlanta Richland Creek: Specific conductivity -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_RC_Cond_Tstream<br><strong>Data notes:</strong> Conductivity and temperature merged by UTC timestamp No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>540483</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254542400</td></tr><tr><td>End</td><td>1759117500</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0392354 %</td></tr><tr><td>Peak lag</td><td>0 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_RC_Cond_Tstream.png" alt="TE diagnostic figure for Atlanta_RC_Cond_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_RC_Cond_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_Cond_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_RC_Cond_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>17. Atlanta Crooked Creek: Specific conductivity -&gt; Stream temperature anomaly</h3>
+<div class="meta"><strong>Analysis ID:</strong> Atlanta_CC_Cond_Tstream<br><strong>Data notes:</strong> Conductivity and temperature merged by UTC timestamp No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>537370</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1254542400</td></tr><tr><td>End</td><td>1759117500</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0552097 %</td></tr><tr><td>Peak lag</td><td>0 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Atlanta_CC_Cond_Tstream.png" alt="TE diagnostic figure for Atlanta_CC_Cond_Tstream">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Atlanta_CC_Cond_Tstream.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_Cond_Tstream.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Atlanta_CC_Cond_Tstream.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>18. Baltimore: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> Baltimore_P_Q<br><strong>Data notes:</strong> Same BES_USGS_QP_0917 file as prior v3 analysis</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>5 minutes</td></tr><tr><td>Complete TE observations</td><td>852425</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1242082800</td></tr><tr><td>End</td><td>1513986900</td></tr><tr><td>Maximum lag</td><td>72 steps (6 hours)</td></tr><tr><td>Peak normalized TE</td><td>1.95874 %</td></tr><tr><td>Peak lag</td><td>1.5 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>73</td></tr><tr><td>Cumulative normalized TE</td><td>0.625776 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Baltimore_P_Q.png" alt="TE diagnostic figure for Baltimore_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Baltimore_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Baltimore_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Baltimore_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>19. Hubbard Brook W3 (all series): Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> HB_w3_P_Q_full<br><strong>Data notes:</strong> Full-series version requested; same file as prior v3 analysis</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>432998</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1314369000</td></tr><tr><td>End</td><td>1704066300</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>1.12239 %</td></tr><tr><td>Peak lag</td><td>0 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>72</td></tr><tr><td>Cumulative normalized TE</td><td>0.237286 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_HB_w3_P_Q_full.png" alt="TE diagnostic figure for HB_w3_P_Q_full">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_HB_w3_P_Q_full.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w3_P_Q_full.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w3_P_Q_full.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>20. Hubbard Brook W3 (growing season): Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> HB_w3_P_Q_GS<br><strong>Data notes:</strong> April through October; same file as prior v3 analysis</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>252902</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1314369000</td></tr><tr><td>End</td><td>1698795900</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>1.19186 %</td></tr><tr><td>Peak lag</td><td>0 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>63</td></tr><tr><td>Cumulative normalized TE</td><td>0.246725 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_HB_w3_P_Q_GS.png" alt="TE diagnostic figure for HB_w3_P_Q_GS">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_HB_w3_P_Q_GS.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w3_P_Q_GS.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w3_P_Q_GS.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>21. Hubbard Brook W8 (all series): Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> HB_w8_P_Q_full<br><strong>Data notes:</strong> Full-series version requested; same file as prior v3 metadata</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>1919853</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>-52683300</td></tr><tr><td>End</td><td>1704066300</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.815607 %</td></tr><tr><td>Peak lag</td><td>0.5 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>73</td></tr><tr><td>Cumulative normalized TE</td><td>0.21099 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_HB_w8_P_Q_full.png" alt="TE diagnostic figure for HB_w8_P_Q_full">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_HB_w8_P_Q_full.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w8_P_Q_full.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w8_P_Q_full.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>22. Hubbard Brook W8 (growing season): Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> HB_w8_P_Q_GS<br><strong>Data notes:</strong> April through October; same file as prior v3 metadata</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>1123147</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>-52683300</td></tr><tr><td>End</td><td>1698795900</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.835624 %</td></tr><tr><td>Peak lag</td><td>0.5 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>73</td></tr><tr><td>Cumulative normalized TE</td><td>0.197597 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_HB_w8_P_Q_GS.png" alt="TE diagnostic figure for HB_w8_P_Q_GS">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_HB_w8_P_Q_GS.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w8_P_Q_GS.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HB_w8_P_Q_GS.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>23. Konza: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> Konza_P_Q<br><strong>Data notes:</strong> Updated interpolated-Q file specified in the 2026-07-10 analysis log</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>516106</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1269020700</td></tr><tr><td>End</td><td>1735605900</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.153305 %</td></tr><tr><td>Peak lag</td><td>0 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>62</td></tr><tr><td>Cumulative normalized TE</td><td>0.0279191 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Konza_P_Q.png" alt="TE diagnostic figure for Konza_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Konza_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Konza_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Konza_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>24. Starkey: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> Starkey_P_Q<br><strong>Data notes:</strong> Same merged P-Q file used in the prior Starkey v3 analysis No TE value exceeded the shuffled threshold.</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>15 minutes</td></tr><tr><td>Complete TE observations</td><td>425068</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>1310427000</td></tr><tr><td>End</td><td>1714521600</td></tr><tr><td>Maximum lag</td><td>72 steps (18 hours)</td></tr><tr><td>Peak normalized TE</td><td>0.0232907 %</td></tr><tr><td>Peak lag</td><td>7.25 hours</td></tr><tr><td>Peak above threshold</td><td>No</td></tr><tr><td>Significant lag positions</td><td>0</td></tr><tr><td>Cumulative normalized TE</td><td>0 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_Starkey_P_Q.png" alt="TE diagnostic figure for Starkey_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_Starkey_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Starkey_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_Starkey_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<section class="analysis"><h3>25. H.J. Andrews GSWS02: Precipitation -&gt; Discharge</h3>
+<div class="meta"><strong>Analysis ID:</strong> HJA_GSWS02_P_Q<br><strong>Data notes:</strong> GSWS02 was the H.J. Andrews reference site in the earlier common P-Q selection; new Keith processed file</div>
+<div class="table-wrap"><table><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody><tr><td>Native resolution</td><td>30 minutes</td></tr><tr><td>Complete TE observations</td><td>397989</td></tr><tr><td>Q=0 observations excluded</td><td>0</td></tr><tr><td>Start</td><td>-386640000</td></tr><tr><td>End</td><td>1538352000</td></tr><tr><td>Maximum lag</td><td>72 steps (36 hours)</td></tr><tr><td>Peak normalized TE</td><td>1.06192 %</td></tr><tr><td>Peak lag</td><td>0.5 hours</td></tr><tr><td>Peak above threshold</td><td>Yes</td></tr><tr><td>Significant lag positions</td><td>65</td></tr><tr><td>Cumulative normalized TE</td><td>0.227023 %</td></tr></tbody></table></div>
+<img src="../04_Results/Figures/TE_lag_HJA_GSWS02_P_Q.png" alt="TE diagnostic figure for HJA_GSWS02_P_Q">
+<ul class="outputs">
+<li><a href="../04_Results/Tables/TE_df_HJA_GSWS02_P_Q.csv">Full lag table</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HJA_GSWS02_P_Q.png">PNG figure</a></li>
+<li><a href="../04_Results/Figures/TE_lag_HJA_GSWS02_P_Q.pdf">PDF figure</a></li>
+</ul></section>
+<h2>Combined outputs</h2><ul>
+<li><a href="../04_Results/Tables/All_sites_TE_summary.csv">All-site TE summary</a></li>
+<li><a href="../04_Results/Data_Audit/Input_data_summary.csv">Input-data audit</a></li>
+<li><a href="../04_Results/verification_manifest.csv">Verification manifest</a></li>
+</ul>
+<p>Peak normalized TE at lag zero describes same-timestamp predictive information and should not be interpreted as a delayed causal response. Cross-resolution comparisons should retain the differing physical horizons represented by 72 native steps.</p>
+</main></body></html>
