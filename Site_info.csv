@@ -15,3 +15,4 @@ HB_w3_P_Q_full,HB_w3,Hubbard_Brook_Alix/precip_discharge_w3.csv,DATETIME,precip,
 HB_w3_P_Q_GS,HB_w3,Hubbard_Brook_Alix/precip_discharge_w3.csv,DATETIME,precip,avg_discharge,GS,,,,P,Q
 HB_w8_P_Q_full,HB_w8,Hubbard_Brook_Alix/precip_discharge_w8.csv,DATETIME,precip,avg_discharge,,,,,P,Q
 HB_w8_P_Q_GS,HB_w8,Hubbard_Brook_Alix/precip_discharge_w8.csv,DATETIME,precip,avg_discharge,GS,,,,P,Q
+Starkey,Starkey_P_Q,Starkey_Adam/SEFR_MergedPQ.csv,DateTime,Precip,Discharge,,,,,P,Q
