@@ -5,6 +5,12 @@ source("01_Functions/Data_loading.R")
 source("01_Functions/TE_implementation.R")
 
 site_info <- data.table::fread("00_Data/Site_info.csv", na.strings = c("", "NA"))[run == TRUE]
+analysis_ids <- commandArgs(trailingOnly = TRUE)
+if (length(analysis_ids)) {
+  missing_ids <- setdiff(analysis_ids, site_info$Analysis_ID)
+  if (length(missing_ids)) stop("Unknown Analysis_ID: ", paste(missing_ids, collapse = ", "))
+  site_info <- site_info[Analysis_ID %in% analysis_ids]
+}
 for (i in seq_len(nrow(site_info))) {
   spec <- site_info[i]
   message(sprintf("[%d/%d] %s", i, nrow(site_info), spec$Analysis_ID))

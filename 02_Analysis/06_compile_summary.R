@@ -1,8 +1,42 @@
-# Build the requested cross-site table and a GitHub-readable complete report.
-# This script summarizes existing TE tables; it does not recalculate TE.
+# Build the cross-site summary and a complete HTML report from TE outputs.
 
 .libPaths(c(normalizePath("R_library"), .libPaths()))
 source("01_Functions/TE_implementation.R")
+
+.html_escape <- function(x) {
+  x <- as.character(x)
+  x <- gsub("&", "&amp;", x, fixed = TRUE)
+  x <- gsub("<", "&lt;", x, fixed = TRUE)
+  x <- gsub(">", "&gt;", x, fixed = TRUE)
+  x <- gsub('"', "&quot;", x, fixed = TRUE)
+  x
+}
+
+.html_table <- function(df, digits = 6L) {
+  display <- as.data.frame(df, stringsAsFactors = FALSE)
+  for (name in names(display)) {
+    if (is.numeric(display[[name]])) {
+      display[[name]] <- format(
+        display[[name]], digits = digits, trim = TRUE, scientific = FALSE
+      )
+    } else if (is.logical(display[[name]])) {
+      display[[name]] <- ifelse(display[[name]], "Yes", "No")
+    }
+  }
+  header <- paste0("<th>", .html_escape(names(display)), "</th>", collapse = "")
+  body <- vapply(seq_len(nrow(display)), function(i) {
+    paste0(
+      "<tr>",
+      paste0("<td>", .html_escape(display[i, ]), "</td>", collapse = ""),
+      "</tr>"
+    )
+  }, character(1))
+  paste0(
+    "<div class=\"table-wrap\"><table><thead><tr>", header,
+    "</tr></thead><tbody>", paste0(body, collapse = ""),
+    "</tbody></table></div>"
+  )
+}
 
 site_info <- data.table::fread("00_Data/Site_info.csv", na.strings = c("", "NA"))
 audit <- data.table::fread("04_Results/Data_Audit/Input_data_summary.csv")
@@ -17,13 +51,24 @@ for (i in seq_len(nrow(configured))) {
   audit_row <- audit[Analysis_ID == spec$Analysis_ID]
   if (nrow(audit_row) != 1L) stop("Missing or duplicate audit row: ", spec$Analysis_ID)
 
-  peak_index <- which.max(te_df$TE)
-  significant <- is.finite(te_df$TE) & is.finite(te_df$TEcrit) & te_df$TE > te_df$TEcrit
+  peak_index <- which.max(te_df$TEnorm)
+  significant <- is.finite(te_df$TEnorm) & is.finite(te_df$TEnormcrit) &
+    te_df$TEnorm > te_df$TEnormcrit
   significant_count <- sum(significant)
-  # User definition: total significant TE divided by the configured lag count.
-  # There are 73 evaluated positions (0:72), but the denominator is 72 lag steps.
-  cumulative_te <- sum(te_df$TE[significant], na.rm = TRUE) / as.integer(spec$max_lag_steps)
+  cumulative_te <- sum(te_df$TEnorm[significant], na.rm = TRUE) /
+    as.integer(spec$max_lag_steps)
+  excluded_zero <- if ("excluded_Q_zero_observations" %in% names(audit_row)) {
+    audit_row$excluded_Q_zero_observations
+  } else {
+    0L
+  }
   notes <- spec$provenance_note
+  if (excluded_zero > 0) {
+    notes <- paste0(
+      notes, "; excluded ", excluded_zero,
+      " Q=0 observations from TE and retained their timestamps as gaps"
+    )
+  }
   if (!significant_count) notes <- paste(notes, "No TE value exceeded the shuffled threshold.")
 
   rows[[i]] <- data.table::data.table(
@@ -33,15 +78,15 @@ for (i in seq_len(nrow(configured))) {
     Native_resolution_hours = audit_row$step_hours,
     Native_resolution_minutes = audit_row$step_hours * 60,
     Data_length_observations = audit_row$rows,
+    Excluded_Q_zero_observations = excluded_zero,
     Data_duration_days = audit_row$duration_days,
     Start_date = audit_row$start,
     End_date = audit_row$end,
-    Peak_TE = te_df$TE[peak_index],
-    Peak_lag_steps = te_df$Lag[peak_index],
+    Peak_normalized_TE_percent = te_df$TEnorm[peak_index],
     Peak_lag_hours = te_df$Lag_time[peak_index],
-    Peak_TE_significant = significant[peak_index],
+    Peak_normalized_TE_significant = significant[peak_index],
     Significant_lag_count = significant_count,
-    Cumulative_TE = cumulative_te,
+    Cumulative_normalized_TE_percent = cumulative_te,
     Max_lag_steps = spec$max_lag_steps,
     Max_lag_hours = max(te_df$Lag_time),
     Notes = notes
@@ -49,71 +94,120 @@ for (i in seq_len(nrow(configured))) {
 }
 
 summary <- data.table::rbindlist(rows, fill = TRUE)
-summary_file <- "04_Results/Tables/All_sites_TE_summary.csv"
-data.table::fwrite(summary, summary_file)
-# Keep the earlier filename as a compatibility copy with the expanded fields.
+data.table::fwrite(summary, "04_Results/Tables/All_sites_TE_summary.csv")
 data.table::fwrite(summary, "04_Results/Tables/All_sites_peak_TE.csv")
 
-fmt <- function(x, digits = 5L) format(x, digits = digits, trim = TRUE, scientific = FALSE)
-md_escape <- function(x) gsub("\\|", "\\\\|", x)
+summary_display <- summary[, .(
+  Site,
+  Variable_pair,
+  Resolution_minutes = Native_resolution_minutes,
+  Observations = Data_length_observations,
+  Q_zero_excluded = Excluded_Q_zero_observations,
+  Start = substr(Start_date, 1, 10),
+  End = substr(End_date, 1, 10),
+  Peak_normalized_TE_percent,
+  Peak_lag_hours,
+  Peak_significant = Peak_normalized_TE_significant,
+  Cumulative_normalized_TE_percent,
+  Notes
+)]
 
-summary_rows <- vapply(seq_len(nrow(summary)), function(i) {
-  x <- summary[i]
-  paste0(
-    "| ", md_escape(x$Site), " | ", md_escape(x$Variable_pair), " | ",
-    fmt(x$Native_resolution_minutes, 5), " min | ", x$Data_length_observations, " | ",
-    substr(x$Start_date, 1, 10), " | ", substr(x$End_date, 1, 10), " | ",
-    fmt(x$Peak_TE, 5), " | ", x$Peak_lag_steps, " (", fmt(x$Peak_lag_hours, 5), " h) | ",
-    ifelse(x$Peak_TE_significant, "yes", "no"), " | ", fmt(x$Cumulative_TE, 5), " | ",
-    md_escape(x$Notes), " |"
-  )
-}, character(1))
-
-detail_sections <- unlist(lapply(seq_len(nrow(summary)), function(i) {
-  x <- summary[i]
-  c(
-    paste0("### ", x$Analysis_ID),
-    "",
-    paste0("- Site and pair: ", x$Site, "; ", x$Variable_pair),
-    paste0("- Record: ", x$Data_length_observations, " complete observations from ", x$Start_date, " through ", x$End_date, "."),
-    paste0("- Native resolution: ", fmt(x$Native_resolution_minutes), " minutes; tested lags: 0-", x$Max_lag_steps, " steps (0-", fmt(x$Max_lag_hours), " hours)."),
-    paste0("- Peak TE: ", fmt(x$Peak_TE), " at ", x$Peak_lag_steps, " steps (", fmt(x$Peak_lag_hours), " hours); above shuffled threshold: ", ifelse(x$Peak_TE_significant, "yes", "no"), "."),
-    paste0("- Significant lag positions: ", x$Significant_lag_count, "; cumulative TE: ", fmt(x$Cumulative_TE), "."),
-    paste0("- Notes: ", x$Notes),
-    paste0("- [Full lag table](../04_Results/Tables/TE_df_", x$Analysis_ID, ".csv) | [PNG figure](../04_Results/Figures/TE_lag_", x$Analysis_ID, ".png) | [PDF figure](../04_Results/Figures/TE_lag_", x$Analysis_ID, ".pdf)"),
-    ""
-  )
-}), use.names = FALSE)
-
-report <- c(
-  "# Sampler Platter transfer-entropy results",
-  "",
-  "## Methods",
-  "",
-  "Each analysis tests lags 0 through 72 in the dataset's native observation steps. `Lag_time` and every plot x-axis convert those native steps to hours using the modal timestamp interval. Thus the physical horizon varies with native resolution.",
-  "",
-  "The generalized workflow preserves the project histogram estimator, quantile-folded extremes, optional structural-zero bins, and 300 shuffled null realizations. Lag windows are retained only when timestamps are contiguous at the detected native resolution.",
-  "",
-  "Temperature analyses use five-day same-clock anomalies, consistent with the prior project workflow. Hubbard Brook growing-season runs retain April through October. Casper is omitted as requested. No stream-temperature-to-discharge direction is analyzed.",
-  "",
-  "Cumulative TE is defined here exactly as requested: the sum of TE values that exceed their shuffled TE threshold, divided by 72 configured lag steps. The lag-zero position can contribute to the numerator, but the fixed denominator remains 72.",
-  "",
-  "## Results summary",
-  "",
-  "| Site | Variable pair | Native resolution | N | Start | End | Peak TE | Peak lag (steps and hours) | Peak significant | Cumulative TE | Notes |",
-  "|---|---|---:|---:|---|---|---:|---:|---:|---:|---|",
-  summary_rows,
-  "",
-  "## Analysis details",
-  "",
-  detail_sections,
-  "## Interpretation notes",
-  "",
-  "A peak at lag zero describes same-timestamp predictive information under this estimator and should not be interpreted as a delayed causal response. A peak marked as not significant did not exceed the shuffled threshold. Cumulative TE is a comparative summary across the common 72-step lag range; because physical horizons differ by native resolution, cross-resolution comparisons should retain that distinction.",
-  "",
-  "## Reproducibility and verification",
-  "",
-  "Configuration and dataset decisions are in `00_Data/Site_info.csv`. The complete input audit is in `04_Results/Data_Audit/Input_data_summary.csv`, and the verification manifest is in `04_Results/verification_manifest.csv`."
+css <- paste0(
+  "body{margin:0;background:#f4f7f8;color:#24303a;font-family:Segoe UI,Arial,sans-serif;line-height:1.6}",
+  "main{width:min(1320px,calc(100% - 32px));margin:32px auto;padding:48px 56px;background:#fff;border:1px solid #d9e1e5;border-radius:12px;box-shadow:0 8px 28px rgba(36,48,58,.08)}",
+  "h1,h2,h3{line-height:1.25}h1{margin:0 0 8px;font-size:2.25rem}h2{margin-top:42px;padding-bottom:8px;border-bottom:2px solid #e8f4f0}h3{margin-top:34px;color:#176f61}",
+  ".subtitle{color:#61717d}.notice{margin:22px 0;padding:14px 18px;background:#e8f4f0;border-left:4px solid #2a8f78;border-radius:4px}",
+  ".table-wrap{overflow-x:auto}table{width:100%;margin:16px 0 24px;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.92rem}",
+  "th,td{padding:8px 10px;border:1px solid #d9e1e5;text-align:right;vertical-align:top}th{background:#f0f5f6;white-space:nowrap}th:first-child,td:first-child{text-align:left}",
+  "code{padding:2px 5px;background:#f0f3f4;border-radius:4px;font-family:Consolas,monospace}img{display:block;width:100%;height:auto;margin:22px auto;border:1px solid #d9e1e5}",
+  "a{color:#176f61}.analysis{margin-top:38px;padding-top:6px}.meta{padding:14px 18px;background:#f8fafb;border:1px solid #d9e1e5;border-radius:6px}.outputs{columns:3}.outputs li{margin-bottom:7px;break-inside:avoid}",
+  "@media(max-width:760px){main{padding:28px 22px}.outputs{columns:1}}@media print{body{background:white}main{width:100%;margin:0;padding:0;border:0;box-shadow:none}}"
 )
-writeLines(report, "03_Reports/TE_analysis_report.md")
-message("Wrote expanded summary and report for ", nrow(summary), " analyses.")
+
+metrics <- data.frame(
+  Metric = c("TE", "TE threshold", "Normalized TE", "MI", "Correlation", "Cumulative TE"),
+  Meaning = c(
+    "Directional information from lagged source to sink, in bits.",
+    "Shuffled critical value used to flag TE above the null reference.",
+    "TE divided by sink entropy and multiplied by 100.",
+    "Non-directional mutual information between lagged source and current sink.",
+    "Pearson correlation between lagged source and current sink.",
+    "Sum of significant normalized TE values divided by the 72 lag steps; reported as percent uncertainty reduction."
+  ),
+  stringsAsFactors = FALSE
+)
+
+html <- c(
+  "<!doctype html>",
+  "<html lang=\"en\"><head><meta charset=\"utf-8\">",
+  "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">",
+  "<title>Sampler Platter Transfer-Entropy Results</title>",
+  paste0("<style>", css, "</style></head><body><main>"),
+  "<h1>Sampler Platter Transfer-Entropy Results</h1>",
+  paste0("<p class=\"subtitle\">Generated ", format(Sys.Date(), "%B %d, %Y"), "</p>"),
+  "<div class=\"notice\">This report summarizes all configured site and variable-pair analyses, their native temporal resolution, record coverage, and TE results.</div>",
+  "<h2>Methods</h2>",
+  "<p>Each analysis evaluates lags 0 through 72 in native observation steps. Tables and figure x-axes convert those steps to hours using the native timestamp interval, so the temporal coverage varies by dataset resolution.</p>",
+  "<p>TE algorithm uses histogram discretization, quantile-folded extremes, optional structural-zero bins, and 300 shuffled null realizations. </p>",
+  "<div class=\"notice\"><strong>Q to stream temperature:</strong> observations with missing Q or Q equal to zero are excluded from TE. Their timestamps are not collapsed, so lag windows cannot connect values across those gaps. Q=0 periods are shaded in both time-series panels.</div>",
+  "<p>Temperature analyses use five-day same-clock anomalies. Hubbard Brook growing-season runs retain April through October. </p>",
+  "<h2>Metrics</h2>",
+  .html_table(metrics),
+  "<h2>Results summary</h2>",
+  .html_table(summary_display)
+)
+
+for (i in seq_len(nrow(summary))) {
+  x <- summary[i]
+  safe_id <- x$Analysis_ID
+  result_table <- data.table::fread(file.path(
+    "04_Results", "Tables", paste0("TE_df_", safe_id, ".csv")
+  ))
+  result_display <- data.frame(
+    Statistic = c(
+      "Native resolution", "Complete TE observations", "Q=0 observations excluded",
+      "Start", "End", "Maximum lag", "Peak normalized TE", "Peak lag",
+      "Peak above threshold", "Significant lag positions", "Cumulative normalized TE"
+    ),
+    Value = c(
+      paste0(format(x$Native_resolution_minutes, trim = TRUE), " minutes"),
+      x$Data_length_observations,
+      x$Excluded_Q_zero_observations,
+      x$Start_date,
+      x$End_date,
+      paste0(x$Max_lag_steps, " steps (", format(x$Max_lag_hours, trim = TRUE), " hours)"),
+      paste0(format(x$Peak_normalized_TE_percent, digits = 6, trim = TRUE), " %"),
+      paste0(format(x$Peak_lag_hours, digits = 6, trim = TRUE), " hours"),
+      ifelse(x$Peak_normalized_TE_significant, "Yes", "No"),
+      x$Significant_lag_count,
+      paste0(format(x$Cumulative_normalized_TE_percent, digits = 6, trim = TRUE), " %")
+    ),
+    stringsAsFactors = FALSE
+  )
+  html <- c(
+    html,
+    paste0("<section class=\"analysis\"><h3>", i, ". ", .html_escape(x$Site), ": ", .html_escape(x$Variable_pair), "</h3>"),
+    paste0("<div class=\"meta\"><strong>Analysis ID:</strong> ", .html_escape(safe_id), "<br><strong>Data notes:</strong> ", .html_escape(x$Notes), "</div>"),
+    .html_table(result_display),
+    paste0("<img src=\"../04_Results/Figures/TE_lag_", safe_id, ".png\" alt=\"TE diagnostic figure for ", .html_escape(safe_id), "\">"),
+    "<ul class=\"outputs\">",
+    paste0("<li><a href=\"../04_Results/Tables/TE_df_", safe_id, ".csv\">Full lag table</a></li>"),
+    paste0("<li><a href=\"../04_Results/Figures/TE_lag_", safe_id, ".png\">PNG figure</a></li>"),
+    paste0("<li><a href=\"../04_Results/Figures/TE_lag_", safe_id, ".pdf\">PDF figure</a></li>"),
+    "</ul></section>"
+  )
+}
+
+html <- c(
+  html,
+  "<h2>Combined outputs</h2><ul>",
+  "<li><a href=\"../04_Results/Tables/All_sites_TE_summary.csv\">All-site TE summary</a></li>",
+  "<li><a href=\"../04_Results/Data_Audit/Input_data_summary.csv\">Input-data audit</a></li>",
+  "<li><a href=\"../04_Results/verification_manifest.csv\">Verification manifest</a></li>",
+  "</ul>",
+  "<p>Peak normalized TE at lag zero describes same-timestamp predictive information and should not be interpreted as a delayed causal response. Cross-resolution comparisons should retain the differing physical horizons represented by 72 native steps.</p>",
+  "</main></body></html>"
+)
+
+writeLines(html, "03_Reports/TE_analysis_report.html", useBytes = TRUE)
+message("Wrote expanded summary and HTML report for ", nrow(summary), " analyses.")

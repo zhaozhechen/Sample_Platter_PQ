@@ -140,7 +140,25 @@ load_site_analysis <- function(spec, data_root = "../../Data") {
 
   out[, source := .SP_transform(time, source_raw, spec$source_transform)]
   out[, sink := .SP_transform(time, sink_raw, spec$sink_transform)]
+  plot_data <- out[, .(time, source, sink)]
+  # W3 contains discharge outside the period with precipitation coverage.
+  # Keep those rows out of the diagnostic time-series panels while retaining
+  # all internal gaps within the overlapping P-Q period.
+  if (grepl("^HB_w3_", as.character(spec$Analysis_ID))) {
+    overlap <- out[is.finite(source) & is.finite(sink), time]
+    if (length(overlap)) {
+      plot_data <- plot_data[time >= min(overlap) & time <= max(overlap)]
+    }
+  }
+  exclude_source_zero <- identical(as.character(spec$source_label), "Discharge") &&
+    grepl("Stream temperature", as.character(spec$sink_label), fixed = TRUE)
+  zero_excluded_rows <- if (exclude_source_zero) {
+    sum(is.finite(out$source) & out$source == 0 & is.finite(out$sink))
+  } else {
+    0L
+  }
   out <- out[is.finite(source) & is.finite(sink)]
+  if (exclude_source_zero) out <- out[source != 0]
   data.table::setorder(out, time)
 
   if (nrow(out) < 10) stop("Fewer than 10 complete rows for ", spec$Analysis_ID)
@@ -148,6 +166,9 @@ load_site_analysis <- function(spec, data_root = "../../Data") {
   attr(out, "input_file") <- input_files
   attr(out, "step_hours") <- step$step_hours
   attr(out, "regular_fraction") <- step$regular_fraction
+  attr(out, "plot_data") <- plot_data
+  attr(out, "exclude_source_zero") <- exclude_source_zero
+  attr(out, "zero_excluded_rows") <- zero_excluded_rows
   out
 }
 
@@ -168,6 +189,7 @@ summarize_site_input <- function(site_df, spec) {
     end = format(max(site_df$time), "%Y-%m-%d %H:%M:%S", tz = "UTC"),
     step_hours = step_hours,
     regular_transition_fraction = attr(site_df, "regular_fraction"),
+    excluded_Q_zero_observations = attr(site_df, "zero_excluded_rows"),
     max_lag_steps = as.integer(spec$max_lag_steps),
     max_lag_hours = as.integer(spec$max_lag_steps) * step_hours,
     notes = spec$provenance_note,

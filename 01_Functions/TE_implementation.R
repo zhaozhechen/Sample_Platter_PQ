@@ -203,14 +203,19 @@ Cal_TE_MI_main <- function(
   do.call(rbind, results)
 }
 
-.TE_theme <- function(base_size = 14) {
-  ggplot2::theme_bw(base_size = base_size) +
+.TE_theme <- function(base_size = 18) {
+  ggplot2::theme_classic(base_size = base_size) +
     ggplot2::theme(
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_line(color = "#E8E8E8", linewidth = 0.3),
-      panel.border = ggplot2::element_rect(color = "black", linewidth = 0.6),
-      plot.title = ggplot2::element_text(face = "bold", hjust = 0),
-      legend.position = "bottom"
+      panel.grid = ggplot2::element_blank(),
+      panel.background = ggplot2::element_rect(fill = "white", color = NA),
+      plot.background = ggplot2::element_rect(fill = "white", color = NA),
+      axis.line = ggplot2::element_line(color = "black", linewidth = 0.7),
+      axis.title = ggplot2::element_text(size = base_size, face = "bold"),
+      axis.text = ggplot2::element_text(size = base_size * 0.82, color = "black"),
+      plot.title = ggplot2::element_text(size = base_size * 1.08, face = "bold", hjust = 0),
+      legend.position = "bottom",
+      legend.text = ggplot2::element_text(size = base_size * 0.86),
+      legend.title = ggplot2::element_text(size = base_size * 0.9, face = "bold")
     )
 }
 
@@ -246,10 +251,27 @@ TE_lag_plot <- function(te_df, metric, color = "#66C2A5", show_title = TRUE) {
       linewidth = 0.85, linetype = "dashed"
     ) +
     ggplot2::labs(x = "Lag (hours)", y = y_label) +
-    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.01, 0.04))) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.02, 0.08))) +
+    ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0.04, 0.2))) +
     .TE_theme()
   if (best$significant) {
     label <- paste0("Detected lag = ", format(best$lag, digits = 4, trim = TRUE), " h")
+    x_range <- diff(range(plot_df$Lag_time, na.rm = TRUE))
+    y_range <- diff(range(plot_df$Metric, na.rm = TRUE))
+    if (!is.finite(y_range) || y_range == 0) y_range <- max(abs(plot_df$Metric), na.rm = TRUE)
+    x_offset <- max(x_range * 0.055, .Machine$double.eps)
+    raw_label_x <- if (best$lag > max(plot_df$Lag_time) * 0.62) {
+      best$lag - x_offset
+    } else {
+      best$lag + x_offset
+    }
+    x_limits <- range(plot_df$Lag_time, na.rm = TRUE)
+    label_x <- min(
+      max(raw_label_x, x_limits[1] + x_range * 0.25),
+      x_limits[2] - x_range * 0.25
+    )
+    label_hjust <- 0.5
+    label_y <- plot_df$Metric[best$index] + max(y_range * 0.12, .Machine$double.eps)
     g <- g +
       ggplot2::geom_vline(
         xintercept = best$lag, color = "#FC8D62", linewidth = 0.9,
@@ -260,22 +282,44 @@ TE_lag_plot <- function(te_df, metric, color = "#66C2A5", show_title = TRUE) {
         fill = "white", shape = 21, size = 3.5, stroke = 1.2
       ) +
       ggplot2::annotate(
-        "label", x = best$lag, y = plot_df$Metric[best$index], label = label,
-        hjust = if (best$lag > max(plot_df$Lag_time) * 0.5) 1 else 0,
-        vjust = 1.25, size = 4, linewidth = 0.2, fill = "white"
+        "label", x = label_x, y = label_y, label = label,
+        hjust = label_hjust, vjust = 0, size = 5.4,
+        label.padding = grid::unit(0.22, "lines"), linewidth = 0.3,
+        fill = "white", color = "black"
       )
   } else {
     g <- g + ggplot2::annotate(
       "label", x = min(plot_df$Lag_time), y = max(plot_df$Metric, na.rm = TRUE),
       label = "Detected lag = NA", hjust = 0, vjust = 1,
-      size = 4, linewidth = 0.2, fill = "white"
+      size = 5.4, linewidth = 0.3, fill = "white"
     )
   }
   if (show_title) g <- g + ggplot2::ggtitle(y_label)
   g
 }
 
-.TE_plot_series <- function(time, value, label, color) {
+.TE_zero_periods <- function(plot_data, step_hours) {
+  zero <- plot_data[is.finite(plot_data$source) & plot_data$source == 0, ]
+  if (!nrow(zero)) return(data.frame())
+  step_seconds <- step_hours * 3600
+  tolerance <- max(1e-6, step_seconds * 1e-6)
+  breaks <- c(TRUE, abs(diff(as.numeric(zero$time)) - step_seconds) > tolerance)
+  zero$period <- cumsum(breaks)
+  periods <- lapply(split(zero$time, zero$period), function(x) {
+    data.frame(
+      xmin = min(x) - step_seconds / 2,
+      xmax = max(x) + step_seconds / 2
+    )
+  })
+  out <- do.call(rbind, periods)
+  out$xmin <- as.POSIXct(out$xmin, origin = "1970-01-01", tz = "UTC")
+  out$xmax <- as.POSIXct(out$xmax, origin = "1970-01-01", tz = "UTC")
+  out
+}
+
+.TE_plot_series <- function(
+    time, value, label, color, shade_periods = NULL,
+    show_shade_legend = FALSE) {
   n <- length(value)
   delta <- diff(as.numeric(time))
   positive <- delta[is.finite(delta) & delta > 0]
@@ -285,10 +329,22 @@ TE_lag_plot <- function(te_df, metric, color = "#66C2A5", show_title = TRUE) {
   segment <- cumsum(c(TRUE, abs(delta - expected) > tolerance))
   index <- if (n > 60000L) unique(round(seq(1, n, length.out = 60000L))) else seq_len(n)
   plot_df <- data.frame(time = time[index], value = value[index], segment = segment[index])
-  ggplot2::ggplot(plot_df, ggplot2::aes(time, value, group = segment)) +
-    ggplot2::geom_line(color = color, linewidth = 0.35) +
+  g <- ggplot2::ggplot(plot_df, ggplot2::aes(time, value, group = segment))
+  if (!is.null(shade_periods) && nrow(shade_periods)) {
+    g <- g + ggplot2::geom_rect(
+      data = shade_periods,
+      ggplot2::aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf,
+                   fill = "Q = 0; excluded from TE"),
+      inherit.aes = FALSE, alpha = 0.28, color = NA,
+      show.legend = show_shade_legend
+    ) + ggplot2::scale_fill_manual(
+      values = c("Q = 0; excluded from TE" = "#F2D6A2"), name = NULL
+    )
+  }
+  g +
+    ggplot2::geom_line(color = color, linewidth = 0.45, na.rm = TRUE) +
     ggplot2::labs(x = NULL, y = label, title = label) +
-    .TE_theme(12)
+    .TE_theme(16)
 }
 
 .TE_plot_hist <- function(value, label, color, remove_zero = FALSE, nbins = 11L) {
@@ -302,21 +358,33 @@ TE_lag_plot <- function(te_df, metric, color = "#66C2A5", show_title = TRUE) {
     ggplot2::geom_histogram(bins = if (remove_zero) nbins - 1L else nbins,
                             fill = color, color = "black", linewidth = 0.25) +
     ggplot2::labs(x = label, y = "Count", title = title) +
-    .TE_theme(12)
+    .TE_theme(16)
 }
 
 plot_TE_result <- function(
     te_df, site_df, site_name, source_label, sink_label, output_file,
     nbins = 11L, dpi = 300) {
   colors <- c(source = "#8DA0CB", sink = "#FC8D62", metric = "#66C2A5")
+  plot_data <- attr(site_df, "plot_data")
+  if (is.null(plot_data)) plot_data <- site_df[, c("time", "source", "sink")]
+  shade_periods <- NULL
+  if (isTRUE(attr(site_df, "exclude_source_zero"))) {
+    shade_periods <- .TE_zero_periods(plot_data, attr(site_df, "step_hours"))
+  }
   source_row <- cowplot::plot_grid(
-    .TE_plot_series(site_df$time, site_df$source, source_label, colors["source"]),
+    .TE_plot_series(
+      plot_data$time, plot_data$source, source_label, colors["source"],
+      shade_periods, show_shade_legend = TRUE
+    ),
     .TE_plot_hist(site_df$source, source_label, colors["source"], FALSE, nbins),
     .TE_plot_hist(site_df$source, source_label, colors["source"], TRUE, nbins),
     nrow = 1, rel_widths = c(2, 1, 1), align = "hv", axis = "tblr"
   )
   sink_row <- cowplot::plot_grid(
-    .TE_plot_series(site_df$time, site_df$sink, sink_label, colors["sink"]),
+    .TE_plot_series(
+      plot_data$time, plot_data$sink, sink_label, colors["sink"],
+      shade_periods, show_shade_legend = FALSE
+    ),
     .TE_plot_hist(site_df$sink, sink_label, colors["sink"], FALSE, nbins),
     .TE_plot_hist(site_df$sink, sink_label, colors["sink"], TRUE, nbins),
     nrow = 1, rel_widths = c(2, 1, 1), align = "hv", axis = "tblr"
@@ -330,11 +398,15 @@ plot_TE_result <- function(
   )
   title <- cowplot::ggdraw() + cowplot::draw_label(
     paste0(site_name, ": ", source_label, " -> ", sink_label),
-    x = 0.01, hjust = 0, fontface = "bold", size = 20
+    x = 0.01, hjust = 0, fontface = "bold", size = 25
   )
   note <- cowplot::ggdraw() + cowplot::draw_label(
-    "Solid = metric; dashed = shuffled threshold; dotted/point = strongest significant lag",
-    x = 0.5, hjust = 0.5, size = 11
+    paste0(
+      "Solid = metric; dashed = shuffled threshold; dotted/point = strongest significant lag",
+      if (isTRUE(attr(site_df, "exclude_source_zero")))
+        "; light shading = Q = 0 observations excluded from TE" else ""
+    ),
+    x = 0.5, hjust = 0.5, size = 14
   )
   combined <- cowplot::plot_grid(
     title, source_row, sink_row, metric_row, note,

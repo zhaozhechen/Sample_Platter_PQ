@@ -17,6 +17,9 @@ Synchrony organization and plotting conventions.
   stream-temperature -> Q analysis is included.
 - Gap-aware TE windows, so lags do not bridge missing periods or excluded
   seasons.
+- Q -> stream-temperature analyses exclude missing-Q and Q=0 observations
+  without collapsing their timestamps. Figures shade Q=0 periods across both
+  the Q and stream-temperature time-series panels.
 - The project's original histogram TE estimator, generalized into shared
   loading, analysis, plotting, and verification functions.
 - The latest Disturbance-style diagnostic figure: source and sink series,
@@ -70,7 +73,7 @@ The local `R_library` directory is ignored by Git. Required packages are
   summary.
 - `04_Results/Tables/TE_df_<Analysis_ID>.csv`: full lag tables.
 - `04_Results/Figures/TE_lag_<Analysis_ID>.png` and `.pdf`: diagnostic figures.
-- `03_Reports/TE_analysis_report.md`: complete GitHub-readable results report
+- `03_Reports/TE_analysis_report.html`: complete styled HTML results report
   with links to every lag table and figure.
 - `04_Results/verification_manifest.csv`: file and lag-unit verification.
 

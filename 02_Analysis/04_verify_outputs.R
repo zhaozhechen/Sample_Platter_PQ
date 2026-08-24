@@ -50,4 +50,11 @@ checks <- lapply(seq_len(nrow(site_info)), function(i) {
 
 manifest <- data.table::rbindlist(checks)
 data.table::fwrite(manifest, "04_Results/verification_manifest.csv")
+report_file <- "03_Reports/TE_analysis_report.html"
+if (!file.exists(report_file) || file.info(report_file)$size < 10000) {
+  stop("Missing or empty HTML report: ", report_file)
+}
+if (file.exists("03_Reports/TE_analysis_report.md")) {
+  stop("Obsolete Markdown report is still present.")
+}
 message("VERIFICATION PASSED for ", nrow(manifest), " analyses")
