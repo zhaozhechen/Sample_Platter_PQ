@@ -2,6 +2,14 @@
 
 .libPaths(c(normalizePath("R_library"), .libPaths()))
 source("01_Functions/TE_implementation.R")
+args <- commandArgs(trailingOnly = TRUE)
+report_only <- "--report-only" %in% args
+output_arg <- grep("^--output=", args, value = TRUE)
+report_file <- if (length(output_arg)) {
+  sub("^--output=", "", output_arg[[1L]])
+} else {
+  "03_Reports/TE_analysis_report.html"
+}
 
 .html_escape <- function(x) {
   x <- as.character(x)
@@ -36,6 +44,32 @@ source("01_Functions/TE_implementation.R")
     "</tr></thead><tbody>", paste0(body, collapse = ""),
     "</tbody></table></div>"
   )
+}
+
+.base64_encode <- function(path) {
+  bytes <- as.integer(readBin(path, what = "raw", n = file.info(path)$size))
+  alphabet <- strsplit(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+    "",
+    fixed = TRUE
+  )[[1]]
+  padding <- (3L - length(bytes) %% 3L) %% 3L
+  padded <- c(bytes, rep.int(0L, padding))
+  triplets <- matrix(padded, ncol = 3L, byrow = TRUE)
+  indices <- cbind(
+    bitwShiftR(triplets[, 1L], 2L),
+    bitwOr(bitwShiftL(bitwAnd(triplets[, 1L], 3L), 4L), bitwShiftR(triplets[, 2L], 4L)),
+    bitwOr(bitwShiftL(bitwAnd(triplets[, 2L], 15L), 2L), bitwShiftR(triplets[, 3L], 6L)),
+    bitwAnd(triplets[, 3L], 63L)
+  )
+  encoded <- alphabet[as.vector(t(indices)) + 1L]
+  if (padding > 0L) encoded[(length(encoded) - padding + 1L):length(encoded)] <- "="
+  paste0(encoded, collapse = "")
+}
+
+.image_data_uri <- function(path) {
+  if (!file.exists(path)) stop("Missing report figure: ", path)
+  paste0("data:image/png;base64,", .base64_encode(path))
 }
 
 site_info <- data.table::fread("00_Data/Site_info.csv", na.strings = c("", "NA"))
@@ -94,8 +128,10 @@ for (i in seq_len(nrow(configured))) {
 }
 
 summary <- data.table::rbindlist(rows, fill = TRUE)
-data.table::fwrite(summary, "04_Results/Tables/All_sites_TE_summary.csv")
-data.table::fwrite(summary, "04_Results/Tables/All_sites_peak_TE.csv")
+if (!report_only) {
+  data.table::fwrite(summary, "04_Results/Tables/All_sites_TE_summary.csv")
+  data.table::fwrite(summary, "04_Results/Tables/All_sites_peak_TE.csv")
+}
 
 summary_display <- summary[, .(
   Site,
@@ -160,6 +196,7 @@ html <- c(
 for (i in seq_len(nrow(summary))) {
   x <- summary[i]
   safe_id <- x$Analysis_ID
+  figure_file <- file.path("04_Results", "Figures", paste0("TE_lag_", safe_id, ".png"))
   result_table <- data.table::fread(file.path(
     "04_Results", "Tables", paste0("TE_df_", safe_id, ".csv")
   ))
@@ -189,25 +226,16 @@ for (i in seq_len(nrow(summary))) {
     paste0("<section class=\"analysis\"><h3>", i, ". ", .html_escape(x$Site), ": ", .html_escape(x$Variable_pair), "</h3>"),
     paste0("<div class=\"meta\"><strong>Analysis ID:</strong> ", .html_escape(safe_id), "<br><strong>Data notes:</strong> ", .html_escape(x$Notes), "</div>"),
     .html_table(result_display),
-    paste0("<img src=\"../04_Results/Figures/TE_lag_", safe_id, ".png\" alt=\"TE diagnostic figure for ", .html_escape(safe_id), "\">"),
-    "<ul class=\"outputs\">",
-    paste0("<li><a href=\"../04_Results/Tables/TE_df_", safe_id, ".csv\">Full lag table</a></li>"),
-    paste0("<li><a href=\"../04_Results/Figures/TE_lag_", safe_id, ".png\">PNG figure</a></li>"),
-    paste0("<li><a href=\"../04_Results/Figures/TE_lag_", safe_id, ".pdf\">PDF figure</a></li>"),
-    "</ul></section>"
+    paste0("<img src=\"", .image_data_uri(figure_file), "\" alt=\"TE diagnostic figure for ", .html_escape(safe_id), "\">"),
+    "</section>"
   )
 }
 
 html <- c(
   html,
-  "<h2>Combined outputs</h2><ul>",
-  "<li><a href=\"../04_Results/Tables/All_sites_TE_summary.csv\">All-site TE summary</a></li>",
-  "<li><a href=\"../04_Results/Data_Audit/Input_data_summary.csv\">Input-data audit</a></li>",
-  "<li><a href=\"../04_Results/verification_manifest.csv\">Verification manifest</a></li>",
-  "</ul>",
   "<p>Peak normalized TE at lag zero describes same-timestamp predictive information and should not be interpreted as a delayed causal response. Cross-resolution comparisons should retain the differing physical horizons represented by 72 native steps.</p>",
   "</main></body></html>"
 )
 
-writeLines(html, "03_Reports/TE_analysis_report.html", useBytes = TRUE)
-message("Wrote expanded summary and HTML report for ", nrow(summary), " analyses.")
+writeLines(html, report_file, useBytes = TRUE)
+message("Wrote expanded summary and HTML report for ", nrow(summary), " analyses to ", report_file, ".")
