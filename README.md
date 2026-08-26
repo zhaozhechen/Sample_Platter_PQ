@@ -68,7 +68,8 @@ The local `R_library` directory is ignored by Git. Required packages are
 ## Main outputs
 
 - `04_Results/Tables/All_sites_TE_summary.csv`: native resolution, record
-  length, dates, pairs, peak TE/lag, cumulative TE, and data notes.
+  length, dates, pairs, significant peak TE/lag, mean significant normalized TE,
+  TE memory, and data notes.
 - `04_Results/Tables/All_sites_peak_TE.csv`: compatibility copy of that expanded
   summary.
 - `04_Results/Tables/TE_df_<Analysis_ID>.csv`: full lag tables.
