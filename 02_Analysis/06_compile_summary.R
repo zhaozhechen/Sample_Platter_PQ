@@ -72,6 +72,11 @@ report_file <- if (length(output_arg)) {
   paste0("data:image/png;base64,", .base64_encode(path))
 }
 
+.format_metric <- function(value, suffix = "", digits = 6L) {
+  if (length(value) != 1L || !is.finite(value)) return("NA")
+  paste0(format(value, digits = digits, trim = TRUE), suffix)
+}
+
 site_info <- data.table::fread("00_Data/Site_info.csv", na.strings = c("", "NA"))
 audit <- data.table::fread("04_Results/Data_Audit/Input_data_summary.csv")
 configured <- site_info[run == TRUE]
@@ -82,15 +87,31 @@ for (i in seq_len(nrow(configured))) {
   result_file <- file.path("04_Results", "Tables", paste0("TE_df_", spec$Analysis_ID, ".csv"))
   if (!file.exists(result_file)) stop("Missing result table: ", result_file)
   te_df <- data.table::fread(result_file)
+  data.table::setorder(te_df, Lag)
   audit_row <- audit[Analysis_ID == spec$Analysis_ID]
   if (nrow(audit_row) != 1L) stop("Missing or duplicate audit row: ", spec$Analysis_ID)
 
-  peak_index <- which.max(te_df$TEnorm)
   significant <- is.finite(te_df$TEnorm) & is.finite(te_df$TEnormcrit) &
     te_df$TEnorm > te_df$TEnormcrit
   significant_count <- sum(significant)
-  cumulative_te <- sum(te_df$TEnorm[significant], na.rm = TRUE) /
-    as.integer(spec$max_lag_steps)
+  if (significant_count > 0L) {
+    significant_indices <- which(significant)
+    peak_index <- significant_indices[which.max(te_df$TEnorm[significant_indices])]
+    peak_te <- te_df$TEnorm[peak_index]
+    peak_lag <- te_df$Lag_time[peak_index]
+    cumulative_te <- mean(te_df$TEnorm[significant_indices])
+  } else {
+    peak_te <- NA_real_
+    peak_lag <- NA_real_
+    cumulative_te <- NA_real_
+  }
+  memory_hours <- NA_real_
+  if (length(significant) > 0L && isTRUE(significant[[1L]])) {
+    first_insignificant <- which(!significant)
+    if (length(first_insignificant) > 0L) {
+      memory_hours <- te_df$Lag_time[first_insignificant[[1L]]]
+    }
+  }
   excluded_zero <- if ("excluded_Q_zero_observations" %in% names(audit_row)) {
     audit_row$excluded_Q_zero_observations
   } else {
@@ -116,11 +137,11 @@ for (i in seq_len(nrow(configured))) {
     Data_duration_days = audit_row$duration_days,
     Start_date = audit_row$start,
     End_date = audit_row$end,
-    Peak_normalized_TE_percent = te_df$TEnorm[peak_index],
-    Peak_lag_hours = te_df$Lag_time[peak_index],
-    Peak_normalized_TE_significant = significant[peak_index],
+    Peak_normalized_TE_percent = peak_te,
+    Peak_lag_hours = peak_lag,
     Significant_lag_count = significant_count,
     Cumulative_normalized_TE_percent = cumulative_te,
+    Memory_hours = memory_hours,
     Max_lag_steps = spec$max_lag_steps,
     Max_lag_hours = max(te_df$Lag_time),
     Notes = notes
@@ -129,8 +150,8 @@ for (i in seq_len(nrow(configured))) {
 
 summary <- data.table::rbindlist(rows, fill = TRUE)
 if (!report_only) {
-  data.table::fwrite(summary, "04_Results/Tables/All_sites_TE_summary.csv")
-  data.table::fwrite(summary, "04_Results/Tables/All_sites_peak_TE.csv")
+  data.table::fwrite(summary, "04_Results/Tables/All_sites_TE_summary.csv", na = "NA")
+  data.table::fwrite(summary, "04_Results/Tables/All_sites_peak_TE.csv", na = "NA")
 }
 
 summary_display <- summary[, .(
@@ -143,8 +164,8 @@ summary_display <- summary[, .(
   End = substr(End_date, 1, 10),
   Peak_normalized_TE_percent,
   Peak_lag_hours,
-  Peak_significant = Peak_normalized_TE_significant,
   Cumulative_normalized_TE_percent,
+  Memory_hours,
   Notes
 )]
 
@@ -161,14 +182,15 @@ css <- paste0(
 )
 
 metrics <- data.frame(
-  Metric = c("TE", "TE threshold", "Normalized TE", "MI", "Correlation", "Cumulative TE"),
+  Metric = c("TE", "TE threshold", "Normalized TE", "MI", "Correlation", "Cumulative TE", "Memory"),
   Meaning = c(
     "Directional information from lagged source to sink, in bits.",
     "Shuffled critical value used to flag TE above the null reference.",
     "TE divided by sink entropy and multiplied by 100.",
     "Non-directional mutual information between lagged source and current sink.",
     "Pearson correlation between lagged source and current sink.",
-    "Sum of significant normalized TE values divided by the 72 lag steps; reported as percent uncertainty reduction."
+    "Mean of the significant normalized TE values (sum divided by the number of significant lag times); reported as percent uncertainty reduction.",
+    "First lag, in hours, at which an initially significant TE sequence becomes insignificant. Memory is NA if TE is not significant at lag zero or remains significant through the evaluated lags."
   ),
   stringsAsFactors = FALSE
 )
@@ -204,7 +226,7 @@ for (i in seq_len(nrow(summary))) {
     Statistic = c(
       "Native resolution", "Complete TE observations", "Q=0 observations excluded",
       "Start", "End", "Maximum lag", "Peak normalized TE", "Peak lag",
-      "Peak above threshold", "Significant lag positions", "Cumulative normalized TE"
+      "Significant lag positions", "Cumulative normalized TE", "Memory"
     ),
     Value = c(
       paste0(format(x$Native_resolution_minutes, trim = TRUE), " minutes"),
@@ -213,11 +235,11 @@ for (i in seq_len(nrow(summary))) {
       x$Start_date,
       x$End_date,
       paste0(x$Max_lag_steps, " steps (", format(x$Max_lag_hours, trim = TRUE), " hours)"),
-      paste0(format(x$Peak_normalized_TE_percent, digits = 6, trim = TRUE), " %"),
-      paste0(format(x$Peak_lag_hours, digits = 6, trim = TRUE), " hours"),
-      ifelse(x$Peak_normalized_TE_significant, "Yes", "No"),
+      .format_metric(x$Peak_normalized_TE_percent, " %"),
+      .format_metric(x$Peak_lag_hours, " hours"),
       x$Significant_lag_count,
-      paste0(format(x$Cumulative_normalized_TE_percent, digits = 6, trim = TRUE), " %")
+      .format_metric(x$Cumulative_normalized_TE_percent, " %"),
+      .format_metric(x$Memory_hours, " hours")
     ),
     stringsAsFactors = FALSE
   )
@@ -233,7 +255,7 @@ for (i in seq_len(nrow(summary))) {
 
 html <- c(
   html,
-  "<p>Peak normalized TE at lag zero describes same-timestamp predictive information and should not be interpreted as a delayed causal response. Cross-resolution comparisons should retain the differing physical horizons represented by 72 native steps.</p>",
+  "<p></p>",
   "</main></body></html>"
 )
 

@@ -4,6 +4,15 @@
 site_info <- data.table::fread("00_Data/Site_info.csv", na.strings = c("", "NA"))[run == TRUE]
 input_summary <- data.table::fread("04_Results/Data_Audit/Input_data_summary.csv")
 status <- data.table::fread("02_Analysis/logs/run_status.csv")
+summary_file <- "04_Results/Tables/All_sites_TE_summary.csv"
+if (!file.exists(summary_file)) stop("Missing all-site summary: ", summary_file)
+summary <- data.table::fread(summary_file)
+
+.same_numeric <- function(actual, expected, tolerance = 1e-8) {
+  if (length(actual) != 1L || length(expected) != 1L) return(FALSE)
+  if (is.na(actual) || is.na(expected)) return(is.na(actual) && is.na(expected))
+  is.finite(actual) && is.finite(expected) && abs(actual - expected) <= tolerance
+}
 
 if (nrow(status[status != "success"]) > 0L) stop("At least one analysis is not successful.")
 if (!setequal(status$Analysis_ID, site_info$Analysis_ID)) stop("Run-status IDs do not match configuration.")
@@ -18,6 +27,8 @@ checks <- lapply(seq_len(nrow(site_info)), function(i) {
   if (!file.exists(png_file) || file.info(png_file)$size < 10000) stop("Missing/empty PNG: ", png_file)
   if (!file.exists(pdf_file) || file.info(pdf_file)$size < 10000) stop("Missing/empty PDF: ", pdf_file)
   result <- data.table::fread(table_file)
+  summary_row <- summary[Analysis_ID == spec$Analysis_ID]
+  if (nrow(summary_row) != 1L) stop("Missing or duplicate summary row for ", spec$Analysis_ID)
   required <- c(
     "Lag", "Lag_time", "Lag_unit", "N_complete_windows", "TE", "TEcrit",
     "TEnorm", "TEnormcrit", "MI", "MIcrit", "Corr", "Corrcrit"
@@ -31,6 +42,41 @@ checks <- lapply(seq_len(nrow(site_info)), function(i) {
   if (abs(max(result$Lag_time) - expected_max_hours) > 1e-4) stop("Lag axis does not match 72 native steps for ", spec$Analysis_ID)
   if (any(result$N_complete_windows <= 0)) stop("Empty lag window for ", spec$Analysis_ID)
   if (any(!is.finite(result$TE)) || any(!is.finite(result$TEcrit))) stop("Non-finite TE result for ", spec$Analysis_ID)
+  significant <- is.finite(result$TEnorm) & is.finite(result$TEnormcrit) &
+    result$TEnorm > result$TEnormcrit
+  significant_indices <- which(significant)
+  if (length(significant_indices)) {
+    peak_index <- significant_indices[which.max(result$TEnorm[significant_indices])]
+    expected_peak <- result$TEnorm[peak_index]
+    expected_peak_lag <- result$Lag_time[peak_index]
+    expected_cumulative <- mean(result$TEnorm[significant_indices])
+  } else {
+    expected_peak <- NA_real_
+    expected_peak_lag <- NA_real_
+    expected_cumulative <- NA_real_
+  }
+  expected_memory <- NA_real_
+  if (length(significant) && isTRUE(significant[[1L]])) {
+    first_insignificant <- which(!significant)
+    if (length(first_insignificant)) {
+      expected_memory <- result$Lag_time[first_insignificant[[1L]]]
+    }
+  }
+  if (summary_row$Significant_lag_count != length(significant_indices)) {
+    stop("Incorrect significant-lag count for ", spec$Analysis_ID)
+  }
+  if (!.same_numeric(summary_row$Peak_normalized_TE_percent, expected_peak)) {
+    stop("Incorrect significant peak TE for ", spec$Analysis_ID)
+  }
+  if (!.same_numeric(summary_row$Peak_lag_hours, expected_peak_lag)) {
+    stop("Incorrect significant peak lag for ", spec$Analysis_ID)
+  }
+  if (!.same_numeric(summary_row$Cumulative_normalized_TE_percent, expected_cumulative)) {
+    stop("Incorrect mean significant TE for ", spec$Analysis_ID)
+  }
+  if (!.same_numeric(summary_row$Memory_hours, expected_memory)) {
+    stop("Incorrect TE memory for ", spec$Analysis_ID)
+  }
   data.frame(
     Analysis_ID = spec$Analysis_ID,
     rows = nrow(result),
